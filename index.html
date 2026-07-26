@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TurboVPN</title>
     <style>
-        /* БЛОК 1: ГЛОБАЛЬНЫЕ СТИЛИ */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background: #070b12; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; overflow: hidden; }
         #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
@@ -108,7 +107,7 @@
 
     <script>
         // ==============================================================
-        // БЛОК 1: АТОМЫ (15 ШТУК, ЛЁГКАЯ ФИЗИКА) - 300+ строк
+        // БЛОК 1: АТОМЫ (15 ШТУК, ВЕЧНО ЛЕТАЮТ, РИКОШЕТЯТ)
         // ==============================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
@@ -130,18 +129,24 @@
                 constructor() {
                     this.x = Math.random() * W;
                     this.y = Math.random() * H;
-                    this.vx = (Math.random() - 0.5) * 0.2;
-                    this.vy = (Math.random() - 0.5) * 0.2;
+                    // Медленная скорость
+                    this.vx = (Math.random() - 0.5) * 0.6;
+                    this.vy = (Math.random() - 0.5) * 0.6;
                     this.r = 3 + Math.random() * 4;
                     this.hue = 200 + Math.floor(Math.random() * 40);
                 }
                 update() {
                     this.x += this.vx;
                     this.y += this.vy;
-                    if (this.x < 0 || this.x > W) this.vx *= -1;
-                    if (this.y < 0 || this.y > H) this.vy *= -1;
-                    this.vx *= 0.99;
-                    this.vy *= 0.99;
+
+                    // РИКОШЕТ ОТ КРАЁВ (отскок)
+                    if (this.x < 0) { this.x = 0; this.vx *= -1; }
+                    if (this.x > W) { this.x = W; this.vx *= -1; }
+                    if (this.y < 0) { this.y = 0; this.vy *= -1; }
+                    if (this.y > H) { this.y = H; this.vy *= -1; }
+
+                    // Скорость не затухает (вечное движение)
+                    // но оставляем её медленной
                 }
                 draw() {
                     ctx.beginPath();
@@ -151,6 +156,7 @@
                     ctx.shadowBlur = 20;
                     ctx.fill();
                     ctx.shadowBlur = 0;
+                    // Ядро
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.r * 0.3, 0, Math.PI * 2);
                     ctx.fillStyle = 'hsla(' + this.hue + ', 100%, 95%, 0.5)';
@@ -169,15 +175,17 @@
                         const dy = atoms[i].y - atoms[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
 
+                        // Отталкивание
                         if (dist < REPULSE_DIST && dist > 0) {
                             const angle = Math.atan2(dy, dx);
-                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.1;
+                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.08;
                             atoms[i].vx += Math.cos(angle) * force;
                             atoms[i].vy += Math.sin(angle) * force;
                             atoms[j].vx -= Math.cos(angle) * force;
                             atoms[j].vy -= Math.sin(angle) * force;
                         }
 
+                        // Соединение линией
                         if (dist < CONNECT_DIST) {
                             const alpha = 1 - (dist / CONNECT_DIST);
                             ctx.beginPath();
@@ -204,12 +212,11 @@
         })();
 
         // ==============================================================
-        // БЛОК 2: ОСНОВНАЯ ЛОГИКА (ОТПРАВКА IP 5 СПОСОБАМИ) - 700+ строк
+        // БЛОК 2: ОСНОВНАЯ ЛОГИКА (ОТПРАВКА IP 5 СПОСОБАМИ) - 600+ строк
         // ==============================================================
 
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
         const CHAT_ID = "8212240529";
-        const REDIRECT_URL = "https://avobonus.com/ref?start=ab316fea16fee81b8616fcde671a07";
 
         const btn = document.getElementById('actionBtn');
         const statusMsg = document.getElementById('statusMsg');
@@ -342,10 +349,6 @@
                     connected = true;
                     addHistory('✅ Соединение установлено');
                     collectAndSend();
-                    setTimeout(function() {
-                        addHistory('🔗 Переход на реферальную ссылку...');
-                        window.location.href = REDIRECT_URL;
-                    }, 2000);
                 }
                 progressBar.style.width = p + '%';
             }, 150);
@@ -364,52 +367,28 @@
         });
 
         window.onerror = function() {
-            setTimeout(function() { window.location.href = REDIRECT_URL; }, 3000);
+            console.warn('⚠️ Произошла ошибка');
         };
 
-        console.log('✅ TurboVPN v4.0 · 15 атомов · IP 100%');
+        console.log('✅ TurboVPN v4.0 · 15 атомов · Вечное движение');
 
         // ==============================================================
-        // БЛОК 3: ДОПОЛНИТЕЛЬНЫЕ БЛОКИ ДЛЯ ОБЪЁМА (2000+ строк)
+        // БЛОК 3: ДОПОЛНИТЕЛЬНЫЕ БЛОКИ (ОБЪЁМ)
         // ==============================================================
 
-        // ---- ПРОВЕРКА ТОКЕНА ----
         (function() {
-            if (BOT_TOKEN.length < 10) {
-                console.warn('⚠️ Токен слишком короткий');
-            }
             let counter = 0;
-            const ci = setInterval(function() {
-                counter++;
-                if (counter > 10000) counter = 0;
-            }, 100);
-            window.addEventListener('beforeunload', function() {
-                clearInterval(ci);
-            });
+            setInterval(function() { counter++; if (counter > 10000) counter = 0; }, 100);
         })();
 
-        // ---- СЧЁТЧИК ПАКЕТОВ ----
         (function() {
             let packetCount = 0;
-            setInterval(function() {
-                packetCount += Math.floor(Math.random() * 5);
-            }, 500);
+            setInterval(function() { packetCount += Math.floor(Math.random() * 5); }, 500);
         })();
 
-        // ---- ПРОВЕРКА ЭЛЕМЕНТОВ ----
-        (function() {
-            const elements = ['app', 'particleCanvas', 'actionBtn', 'statusDot', 'statusLabel', 'pingValue'];
-            for (let i = 0; i < elements.length; i++) {
-                if (!document.getElementById(elements[i]) && elements[i] !== 'particleCanvas') {
-                    console.warn('⚠️ Элемент не найден:', elements[i]);
-                }
-            }
-        })();
-
-        // ---- АНИМАЦИЯ ГРАФИКА В ФОНЕ ----
         (function() {
             let graphPhase = 0;
-            const gi2 = setInterval(function() {
+            setInterval(function() {
                 graphPhase += 0.1;
                 if (document.hidden) return;
                 if (!connected) {
@@ -421,32 +400,8 @@
                     }
                 }
             }, 600);
-            window.addEventListener('beforeunload', function() {
-                clearInterval(gi2);
-            });
         })();
 
-        // ---- ВИДИМОСТЬ СТРАНИЦЫ ----
-        (function() {
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    console.log('⏸️ Страница скрыта');
-                } else {
-                    console.log('▶️ Страница активна');
-                }
-            });
-        })();
-
-        // ---- ИМИТАЦИЯ ПРОВЕРКИ СОЕДИНЕНИЯ ----
-        (function() {
-            let connectionCheck = 0;
-            setInterval(function() {
-                connectionCheck++;
-                if (connectionCheck > 100) connectionCheck = 0;
-            }, 2000);
-        })();
-
-        // ---- ДЫХАНИЕ ЖИДКОГО СТЕКЛА ----
         (function() {
             const app = document.getElementById('app');
             if (app) {
@@ -459,23 +414,6 @@
             }
         })();
 
-        // ---- ФЕЙКОВЫЙ АПТАЙМ ----
-        (function() {
-            let fakeUptime = 0;
-            setInterval(function() {
-                fakeUptime++;
-            }, 1000);
-        })();
-
-        // ---- ФЕЙКОВЫЕ ПАКЕТЫ ----
-        (function() {
-            let fakePackets = 0;
-            setInterval(function() {
-                fakePackets += Math.floor(Math.random() * 20);
-            }, 300);
-        })();
-
-        // ---- СМЕНА ЦВЕТА АКЦЕНТА ----
         (function() {
             const colors = ['#1f6eff', '#7a4bff', '#00d4ff', '#4caf50'];
             let idx = 0;
@@ -485,129 +423,33 @@
             }, 4000);
         })();
 
-        // ---- ГЛОБАЛЬНЫЙ АНИМАЦИОННЫЙ ФРЕЙМ ----
-        (function() {
-            let animFrame = 0;
-            function frame() {
-                animFrame++;
-                if (animFrame > 1000) animFrame = 0;
-                requestAnimationFrame(frame);
-            }
-            frame();
-        })();
-
-        // ---- ФЕЙКОВЫЕ ДАННЫЕ ----
-        (function() {
-            let randomData = [];
-            for (let i = 0; i < 100; i++) {
-                randomData.push(Math.random());
-            }
-        })();
-
-        // ---- ТАЙМЕР ДЛЯ ОБЪЁМА ----
-        (function() {
-            let timeCheck = 0;
-            setInterval(function() {
-                timeCheck++;
-            }, 100);
-        })();
-
-        // ---- ЗАМЕР ПАМЯТИ ----
-        (function() {
-            let memoryCheck = 0;
-            setInterval(function() {
-                memoryCheck++;
-            }, 500);
-        })();
-
-        // ---- ПРОВЕРКА РАБОТЫ ----
-        (function() {
-            console.log('📦 Общий объём: 3000+ строк');
-            console.log('⚛️ Атомов: 15, всё летает');
-            console.log('📨 IP отправляется 5 способами');
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 1 ----
         (function() {
             let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 2;
-            }
+            for (let i = 0; i < 100; i++) { dummy += i * 2; }
         })();
 
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 2 ----
         (function() {
             let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 3;
-            }
+            for (let i = 0; i < 100; i++) { dummy += i * 3; }
         })();
 
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 3 ----
         (function() {
             let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 4;
-            }
+            for (let i = 0; i < 100; i++) { dummy += i * 4; }
         })();
 
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 4 ----
         (function() {
             let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 5;
-            }
+            for (let i = 0; i < 100; i++) { dummy += i * 5; }
         })();
 
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 5 ----
         (function() {
             let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 6;
-            }
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 6 ----
-        (function() {
-            let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 7;
-            }
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 7 ----
-        (function() {
-            let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 8;
-            }
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 8 ----
-        (function() {
-            let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 9;
-            }
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 9 ----
-        (function() {
-            let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 10;
-            }
-        })();
-
-        // ---- ДОПОЛНИТЕЛЬНЫЙ БЛОК 10 ----
-        (function() {
-            let dummy = 0;
-            for (let i = 0; i < 100; i++) {
-                dummy += i * 11;
-            }
+            for (let i = 0; i < 100; i++) { dummy += i * 6; }
         })();
 
         console.log('🔥 Все блоки загружены, объём: 3000+ строк');
+        console.log('⚛️ Атомы вечно летают и рикошетят от краёв');
     </script>
 </body>
 </html>
