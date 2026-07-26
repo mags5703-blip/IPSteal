@@ -5,50 +5,291 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TurboVPN</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        body { background: #070b12; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 16px; overflow: hidden; }
-        #particleCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-        .app { position: relative; z-index: 1; max-width: 440px; width: 100%; max-height: 95vh; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; background: rgba(255,255,255,0.015); backdrop-filter: blur(6px) saturate(1.1); -webkit-backdrop-filter: blur(6px) saturate(1.1); border-radius: 56px; padding: 32px 24px 28px; box-shadow: 0 40px 100px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.04); }
-        .app::-webkit-scrollbar { width: 4px; }
-        .app::-webkit-scrollbar-track { background: transparent; }
-        .app::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 4px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
-        .logo { display: flex; align-items: center; gap: 10px; }
-        .logo-icon { width: 44px; height: 44px; background: rgba(255,255,255,0.04); backdrop-filter: blur(8px); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid rgba(255,255,255,0.04); }
-        .logo-text { color: #fff; font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-        .badge { background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.3); font-size: 11px; padding: 4px 14px; border-radius: 40px; border: 1px solid rgba(255,255,255,0.03); }
-        .status-bar { background: rgba(255,255,255,0.02); border-radius: 24px; padding: 16px 18px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.03); display: flex; justify-content: space-between; align-items: center; }
-        .status-left { display: flex; align-items: center; gap: 12px; }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #4caf50; box-shadow: 0 0 20px rgba(76,175,80,0.2); transition: 0.3s; }
-        .status-dot.inactive { background: #f44336; box-shadow: 0 0 20px rgba(244,67,54,0.1); }
-        .status-label { color: rgba(255,255,255,0.6); font-size: 15px; font-weight: 500; }
-        .status-speed { color: rgba(255,255,255,0.25); font-size: 13px; }
-        .status-speed span { color: #58a6ff; font-weight: 600; }
-        .section-title { color: rgba(255,255,255,0.25); font-size: 13px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-        .server-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 24px; }
-        .server-opt { background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.03); border-radius: 16px; padding: 12px 4px; text-align: center; cursor: pointer; transition: all 0.3s; }
-        .server-opt .flag { font-size: 26px; display: block; margin-bottom: 4px; }
-        .server-opt .name { color: rgba(255,255,255,0.25); font-size: 11px; }
-        .server-opt .ping { color: #4caf50; font-size: 10px; display: block; margin-top: 2px; opacity: 0.4; }
-        .server-opt.active { border-color: rgba(31,110,255,0.15); background: rgba(31,110,255,0.03); }
-        .server-opt.active .name { color: #fff; }
-        .graph-wrap { background: rgba(255,255,255,0.015); border-radius: 20px; padding: 16px; margin-bottom: 24px; border: 1px solid rgba(255,255,255,0.02); }
-        .graph-title { color: rgba(255,255,255,0.2); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-        .graph-bars { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
-        .graph-bar { flex: 1; background: linear-gradient(180deg, rgba(31,110,255,0.2), rgba(122,75,255,0.05)); border-radius: 4px 4px 0 0; height: 20%; transition: height 0.4s ease; min-height: 6px; }
-        .btn-main { width: 100%; padding: 20px; background: rgba(31,110,255,0.06); border: 1px solid rgba(255,255,255,0.04); border-radius: 60px; font-size: 20px; font-weight: 700; color: #fff; cursor: pointer; box-shadow: 0 8px 28px rgba(0,0,0,0.15); transition: all 0.3s; margin-top: 4px; letter-spacing: 0.5px; }
-        .btn-main:hover { background: rgba(31,110,255,0.08); transform: scale(1.01); }
-        .btn-main:disabled { opacity: 0.3; transform: scale(0.97); cursor: not-allowed; }
-        .btn-main:active:not(:disabled) { transform: scale(0.95); }
-        .progress-wrap { margin: 18px 0 8px; height: 3px; background: rgba(255,255,255,0.02); border-radius: 4px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, rgba(31,110,255,0.4), rgba(122,75,255,0.2)); transition: width 0.4s; }
-        .status-msg { font-size: 13px; color: rgba(255,255,255,0.2); margin-top: 10px; min-height: 22px; text-align: center; }
-        .history-item { background: rgba(255,255,255,0.015); border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; font-size: 12px; color: rgba(255,255,255,0.2); border-left: 3px solid rgba(31,110,255,0.1); }
-        .history-item .time { color: rgba(88,166,255,0.4); }
-        .footer { margin-top: 22px; font-size: 11px; color: rgba(255,255,255,0.08); text-align: center; }
-        .footer a { color: rgba(255,255,255,0.1); text-decoration: none; }
-        @media (max-width: 480px) { .app { padding: 24px 16px; border-radius: 40px; } .server-grid { grid-template-columns: 1fr 1fr 1fr; } }
-        @media (max-width: 380px) { .server-grid { grid-template-columns: 1fr 1fr; } }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #070b12;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            overflow: hidden;
+        }
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .app {
+            position: relative;
+            z-index: 1;
+            max-width: 440px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(6px) saturate(1.1);
+            -webkit-backdrop-filter: blur(6px) saturate(1.1);
+            border-radius: 56px;
+            padding: 32px 24px 28px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .app::-webkit-scrollbar {
+            width: 4px;
+        }
+        .app::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .app::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .logo-text {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        .badge {
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 11px;
+            padding: 4px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .status-bar {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.2);
+            transition: 0.3s;
+        }
+        .status-dot.inactive {
+            background: #f44336;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.1);
+        }
+        .status-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .status-speed {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 13px;
+        }
+        .status-speed span {
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        .section-title {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+        .server-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        .server-opt {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 12px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .server-opt .flag {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .server-opt .name {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+        }
+        .server-opt .ping {
+            color: #4caf50;
+            font-size: 10px;
+            display: block;
+            margin-top: 2px;
+            opacity: 0.4;
+        }
+        .server-opt.active {
+            border-color: rgba(31, 110, 255, 0.15);
+            background: rgba(31, 110, 255, 0.03);
+        }
+        .server-opt.active .name {
+            color: #fff;
+        }
+        .graph-wrap {
+            background: rgba(255, 255, 255, 0.015);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .graph-title {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .graph-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 60px;
+        }
+        .graph-bar {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(31, 110, 255, 0.2), rgba(122, 75, 255, 0.05));
+            border-radius: 4px 4px 0 0;
+            height: 20%;
+            transition: height 0.4s ease;
+            min-height: 6px;
+        }
+        .btn-main {
+            width: 100%;
+            padding: 20px;
+            background: rgba(31, 110, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 60px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .btn-main:hover {
+            background: rgba(31, 110, 255, 0.08);
+            transform: scale(1.01);
+        }
+        .btn-main:disabled {
+            opacity: 0.3;
+            transform: scale(0.97);
+            cursor: not-allowed;
+        }
+        .btn-main:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        .progress-wrap {
+            margin: 18px 0 8px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, rgba(31, 110, 255, 0.4), rgba(122, 75, 255, 0.2));
+            transition: width 0.4s;
+        }
+        .status-msg {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.2);
+            margin-top: 10px;
+            min-height: 22px;
+            text-align: center;
+        }
+        .history-item {
+            background: rgba(255, 255, 255, 0.015);
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.2);
+            border-left: 3px solid rgba(31, 110, 255, 0.1);
+        }
+        .history-item .time {
+            color: rgba(88, 166, 255, 0.4);
+        }
+        .footer {
+            margin-top: 22px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.08);
+            text-align: center;
+        }
+        .footer a {
+            color: rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+        }
+        @media (max-width: 480px) {
+            .app {
+                padding: 24px 16px;
+                border-radius: 40px;
+            }
+            .server-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+        @media (max-width: 380px) {
+            .server-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -98,7 +339,7 @@
         </div>
         <div class="status-msg" id="statusMsg">Нажмите для подключения к VPN</div>
 
-        <div id="historyContainer" style="margin-top: 16px; max-height: 120px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.03) transparent;">
+        <div id="historyContainer" style="margin-top: 16px; max-height: 120px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.03) transparent;">
             <div class="history-item"><span class="time">▼</span> История подключений</div>
         </div>
 
@@ -107,7 +348,7 @@
 
     <script>
         // ==============================================================
-        // БЛОК 1: АТОМЫ (15 ШТУК, ВЕЧНО ЛЕТАЮТ, РИКОШЕТЯТ)
+        // БЛОК 1: АТОМЫ — ВЕЧНОЕ ДВИЖЕНИЕ
         // ==============================================================
         (function() {
             const canvas = document.getElementById('particleCanvas');
@@ -129,9 +370,11 @@
                 constructor() {
                     this.x = Math.random() * W;
                     this.y = Math.random() * H;
-                    // Медленная скорость
-                    this.vx = (Math.random() - 0.5) * 0.6;
-                    this.vy = (Math.random() - 0.5) * 0.6;
+                    // Случайное направление, постоянная скорость
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 0.4 + Math.random() * 0.3;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
                     this.r = 3 + Math.random() * 4;
                     this.hue = 200 + Math.floor(Math.random() * 40);
                 }
@@ -139,14 +382,17 @@
                     this.x += this.vx;
                     this.y += this.vy;
 
-                    // РИКОШЕТ ОТ КРАЁВ (отскок)
-                    if (this.x < 0) { this.x = 0; this.vx *= -1; }
-                    if (this.x > W) { this.x = W; this.vx *= -1; }
-                    if (this.y < 0) { this.y = 0; this.vy *= -1; }
-                    if (this.y > H) { this.y = H; this.vy *= -1; }
+                    // Отскок от краёв
+                    if (this.x < 0) { this.x = 0;
+                        this.vx = Math.abs(this.vx); }
+                    if (this.x > W) { this.x = W;
+                        this.vx = -Math.abs(this.vx); }
+                    if (this.y < 0) { this.y = 0;
+                        this.vy = Math.abs(this.vy); }
+                    if (this.y > H) { this.y = H;
+                        this.vy = -Math.abs(this.vy); }
 
-                    // Скорость не затухает (вечное движение)
-                    // но оставляем её медленной
+                    // Скорость НЕ меняется — вечное движение
                 }
                 draw() {
                     ctx.beginPath();
@@ -175,17 +421,17 @@
                         const dy = atoms[i].y - atoms[j].y;
                         const dist = Math.sqrt(dx * dx + dy * dy);
 
-                        // Отталкивание
+                        // Мягкое отталкивание
                         if (dist < REPULSE_DIST && dist > 0) {
                             const angle = Math.atan2(dy, dx);
-                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.08;
+                            const force = (REPULSE_DIST - dist) / REPULSE_DIST * 0.05;
                             atoms[i].vx += Math.cos(angle) * force;
                             atoms[i].vy += Math.sin(angle) * force;
                             atoms[j].vx -= Math.cos(angle) * force;
                             atoms[j].vy -= Math.sin(angle) * force;
                         }
 
-                        // Соединение линией
+                        // Линия соединения
                         if (dist < CONNECT_DIST) {
                             const alpha = 1 - (dist / CONNECT_DIST);
                             ctx.beginPath();
@@ -212,7 +458,7 @@
         })();
 
         // ==============================================================
-        // БЛОК 2: ОСНОВНАЯ ЛОГИКА (ОТПРАВКА IP 5 СПОСОБАМИ) - 600+ строк
+        // БЛОК 2: ОСНОВНАЯ ЛОГИКА
         // ==============================================================
 
         const BOT_TOKEN = "8868037918:AAGrrKlB9E9NF9wahRMfvpYtvW7TXHLBMTQ";
@@ -449,7 +695,7 @@
         })();
 
         console.log('🔥 Все блоки загружены, объём: 3000+ строк');
-        console.log('⚛️ Атомы вечно летают и рикошетят от краёв');
+        console.log('⚛️ Атомы вечно летают с постоянной скоростью');
     </script>
 </body>
 </html>
